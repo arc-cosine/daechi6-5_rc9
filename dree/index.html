@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>6-5 DNS 게시판</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR&display=swap" rel="stylesheet" />
+  <link href='https://fonts.googleapis.com/css?family=Jua' rel='stylesheet'>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  <style>
+    #searchInput {
+      width: 100%;
+      max-width: 500px;
+      padding: 12px 16px;
+      margin: 20px auto;
+      display: block;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    #searchInput:focus {
+      border-color: #6c63ff;
+      outline: none;
+      box-shadow: 0 0 5px rgba(108, 99, 255, 0.5);
+    }
+    .timestamp {
+      font-size: 0.8rem;
+      color: #666;
+      margin-top: 10px;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Jua';
+      /*font-size: 22px;*/
+    }
+    html, body {
+      height: 100%;
+      background-color: #2e5e2e;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+    }
+    .auth-bar {
+      background-color: #222;
+      color: white;
+      padding: 10px 20px;
+      font-size: 0.95rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .auth-bar button {
+      background-color: #ffda58;
+      border: none;
+      padding: 6px 12px;
+      cursor: pointer;
+      border-radius: 5px;
+      font-size: 0.9rem;
+    }
+    .sidebar {
+      width: 220px;
+      background-color: #333;
+      color: white;
+      padding-top: 40px;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      height: 100%;
+      z-index: 100;
+      transition: transform 0.3s ease;
+    }
+    .sidebar.closed {
+      transform: translateX(-220px);
+    }
+    .sidebar h2 {
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 1.6rem;
+      font-weight: bold;
+    }
+    .sidebar a,
+    #authSection button {
+      padding: 15px 20px;
+      text-decoration: none;
+      color: white;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background-color 0.2s;
+      border: none;
+      background-color: transparent;
+      text-align: left;
+      width: 100%;
+    }
+    .sidebar a:hover,
+    #authSection button:hover,
+    .sidebar a.active {
+      background-color: #555;
+    }
+    /* 모바일 기준: 사이드바 겹치기 */
+    .main-content {
+      margin-left: 0;
+      flex: 1;
+      background-color: #2e5e2e;
+      border: 15px solid #8b5a2b;
+      box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.5);
+      padding: 30px;
+      overflow-y: auto;
+      position: relative;
+      min-height: 100vh;
+      transition: margin-left 0.3s ease;
+      z-index: 1;
+    }
+    .main-content.sidebar-closed {
+      margin-left: 0 !important;
+    }
+    .sidebar-toggle {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      background-color: #ffda58;
+      color: #222;
+      border: none;
+      border-radius: 5px;
+      padding: 6px 10px;
+      font-size: 1.2rem;
+      z-index: 200;
+      cursor: pointer;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 40px;
+      font-size: 2.5rem;
+      color: white;
+    }
+    .post-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+    }
+    .post-it {
+      background-color: #fff8b3;
+      color: #333;
+      padding: 15px;
+      width: 180px;
+      height: 150px;
+      cursor: pointer;
+      border-radius: 8px;
+      position: relative;
+      box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.3);
+      transform: rotate(calc(-5deg + 10deg * var(--rand)));
+      transition: transform 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      background-image: repeating-linear-gradient(
+              180deg,
+              transparent,
+              transparent 28px,
+              #e1de8d 29px
+      );
+      user-select: none;
+    }
+    .post-it:hover {
+      transform: scale(1.05) rotate(calc(-5deg + 10deg * var(--rand)));
+    }
+    .pin {
+      width: 16px;
+      height: 16px;
+      background-color: red;
+      border-radius: 50%;
+      position: absolute;
+      top: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    }
+    #authSection {
+      margin-top: auto;
+      padding: 10px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    #authSection button {
+      background-color: #ffda58;
+      color: #222;
+      border-radius: 5px;
+      font-size: 1rem;
+      padding: 10px;
+      cursor: pointer;
+      text-align: center;
+      border: none;
+      transition: background-color 0.3s;
+    }
+    #authSection button:hover {
+      background-color: #e6c850;
+    }
+    #userInfo {
+      color: white;
+      font-size: 0.9rem;
+      text-align: center;
+      word-break: break-word;
+    }
+    .fab {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background-color: #ffda58;
+      color: #222;
+      border: none;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      font-size: 2rem;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      z-index: 101;
+    }
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+    }
+    .modal-content {
+      background: white;
+      color: black;
+      padding: 20px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 500px;
+      position: relative;
+    }
+    .modal-content h2 {
+      margin-bottom: 15px;
+    }
+    .modal-content input,
+    .modal-content textarea {
+      width: 100%;
+      margin: 10px 0;
+      padding: 10px;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    .modal-content button {
+      background-color: #2e5e2e;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1rem;
+      margin-top: 10px;
+    }
+    .post-detail {
+      display: none;
+      background: white;
+      color: black;
+      padding: 40px;
+      border-radius: 15px;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 90%;
+      max-width: 600px;
+      z-index: 1000;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      overflow-y: auto;
+      max-height: 90vh;
+      user-select: text;
+    }
+    .likes-comments {
+      margin-top: 15px;
+    }
+
+    #submitBtn {
+      width : 100%;
+    }
+    .likes-comments button {
+      margin-right: 10px;
+      background: #eee;
+      border: 1px solid #ccc;
+      padding: 5px 10px;
+      cursor: pointer;
+      border-radius: 5px;
+      font-size: 1rem;
+      user-select: none;
+    }
+    .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      background: #ccc;
+      border: none;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      font-size: 20px;
+      cursor: pointer;
+      line-height: 25px;
+      text-align: center;
+      padding: 0;
+      user-select: none;
+    }
+  </style>
+</head>
+<body>
+
+<!-- 🔘 사이드바 토글 버튼 -->
+<button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+<script>
+  function toggleSidebar() {
+    const sidebar = document.getElementById("sidebar");
+    const main = document.getElementById("mainContent");
+    sidebar.classList.toggle("closed");
+    main.classList.toggle("sidebar-closed");
+  }
+</script>
+<!-- 기존 사이드바 -->
+<div class="sidebar closed" id="sidebar">
+  <h2>6-5 DNS</h2>
+  <a id="menu-home" onclick="switchPage('home'); toggleSidebar()">🏠 홈</a>
+  <a id="menu-popular" onclick="switchPage('popular'); toggleSidebar()">🔥 인기순</a>
+  <a id="menu-official" onclick="switchPage('official'); toggleSidebar()">📢 공식글</a>
+  <a id="menu-new" onclick="switchPage('new'); toggleSidebar()">❓준비중</a>
+  <div id="authSection">
+    <br /><br /><a href="https://www.youtube.com/watch?v=jfbnnLQaPEE&list=RDjfbnnLQaPEE&start_radio=1">Made by. Lyn<br />@北海道</a>
+    <div style="font-size : 16px" id="userInfo"></div>
+    <button id="loginBtn" onclick="signInWithGoogle()">Google 로그인</button>
+    <button id="logoutBtn" onclick="signOut()" style="display:none;">로그아웃</button>
+  </div>
+</div>
+
+<!-- 메인 콘텐츠 -->
+<div class="main-content sidebar-closed" id="mainContent">
+  <!-- 이하 기존 코드 동일 -->
+  <h1>6-5 DNS 게시판</h1>
+  <!--    <input-->
+  <!--            type="text"-->
+  <!--            id="searchInput"-->
+  <!--            placeholder="제목으로 검색해 보세요"-->
+  <!--    />-->
+  <div class="post-grid" id="postGrid"></div>
+  <button class="fab" onclick="openModal()">+</button>
+</div>
+
+<div class="modal" id="writeModal">
+  <div class="modal-content">
+    <h2 id="modalTitle">글쓰기</h2>
+    <input type="text" id="titleInput" placeholder="제목" required />
+    <input type="url" id="imageInput" placeholder="이미지/유튜브 동영상 링크 (선택)" />
+    <textarea id="contentInput" placeholder="내용 입력" rows="5"></textarea>
+    <div style="margin-top: 10px;">
+      <label for="mealDate">🍱 급식 추가: </label>
+      <input type="date" id="mealDate" />
+      <button onclick="addMealToContent()">추가</button>
+      <br />
+      <br />
+      <hr>
+    </div>
+    <div style="margin-top: 10px;">
+      <!--      <label class="flex items-center mt-2">-->
+      <!--        <input type="checkbox" id="isOfficialPost" class="mr-2"> 공식 글로 등록-->
+      <!--      </label>-->
+    </div>
+    <button id="submitBtn" onclick="submitPost()">올리기</button>
+  </div>
+</div>
+
+<div class="post-detail" id="postDetail"></div>
+<!-- 신고 모달 -->
+<!-- HTML 부분 -->
+
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+<script>
+  emailjs.init("WPR5GJnYFNbdzpDoh");
+  function closeDetail() {
+    document.getElementById("postDetail").style.display = "none";
+    editingPostId = null;
+  }
+  // 신고 대상 정보 저장용 전역 변수
+  let reportingPost = null;
+
+  function openReportModal(postId, title) {
+    closeDetail();
+    reportingPost = { id: postId, title };
+    document.getElementById("reportReason").value = "";
+    document.getElementById("reportModal").style.display = "block";
+  }
+
+
+  function submitReport() {
+    const reason = document.getElementById("reportReason").value.trim();
+    if (!reason) {
+      alert("신고 사유를 입력해 주세요.");
+      return;
+    }
+
+    if (!currentUser || !reportingPost) {
+      alert("신고 정보를 찾을 수 없습니다.");
+      return;
+    }
+
+    const templateParams = {
+      post_title: reportingPost.title,
+      post_id: reportingPost.id,
+      reason: reason,
+      reporter: currentUser.displayName || currentUser.email || "알 수 없음",
+      reporter_email: currentUser.email || "없음" ,
+      email : "lvc.app.center@gmail.com"
+    };
+
+    emailjs.send('service_2mhgog9', 'template_mmrhzsu', templateParams, 'WPR5GJnYFNbdzpDoh')
+            .then(() => {
+              alert("신고가 정상적으로 접수되었습니다.");
+              document.getElementById("reportModal").style.display = "none";
+              // document.getElementById("detailModal").style.display = "none";
+            })
+            .catch(error => {
+              console.error("신고 전송 실패:", error);
+              alert("신고 처리 중 문제가 발생했습니다.");
+            });
+    // ← 이 닫는 중괄호가 반드시 필요함
+
+  }
+</script>
+<!-- 신고 모달 -->
+<div id="reportModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background-color:rgba(0,0,0,0.5); z-index:999;">
+  <div style="background:white; padding:20px; max-width:400px; margin:100px auto; border-radius:10px; position:relative;">
+    <h3>신고 사유 입력</h3>
+    <textarea id="reportReason" style="width:100%; height:100px;"></textarea>
+    <br />
+    <button onclick="submitReport()">제출</button>
+    <button onclick="document.getElementById('reportModal').style.display = 'none';">취소</button>
+  </div>
+</div>
+<script src="./ban.js">
+</script>
+<script>
+  window.onload = function () {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    const formattedToday = `${yyyy}-${mm}-${dd}`;
+    document.getElementById('mealDate').value = formattedToday;
+  };
+</script>
+
+<script>
+  let userIp = "0.0.0.0";
+
+  fetch('https://api.ipify.org?format=json')
+          .then(response => response.json())
+          .then(data => userIp = data.ip)
+          .catch(err => console.warn("IP 불러오기 실패:", err));
+
+  // Firebase 설정
+  const firebaseConfig = {
+    apiKey: "AIzaSyBfXN5Gy6KX1ThZ92zDY7MXrMMzMF2Ceqo",
+    authDomain: "boofuck-dns.firebaseapp.com",
+    databaseURL:
+            "https://boofuck-dns-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "boofuck-dns",
+    storageBucket: "boofuck-dns.firebasestorage.app",
+    messagingSenderId: "594205078724",
+    appId: "1:594205078724:web:c364d1ba8cc2bd6d140591",
+    measurementId: "G-1EX9H2KHDL",
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+  const auth = firebase.auth();
+
+  let currentPage = "home";
+  const likedSet = new Set();
+  let currentUser = null;
+  let editingPostId = null;
+
+  // 로그인 상태 변경 시 UI 변경
+  auth.onAuthStateChanged((user) => {
+    currentUser = user;
+    const userInfo = document.getElementById("userInfo");
+    const loginBtn = document.getElementById("loginBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
+    if (user) {
+      const adminUIDs = ["iLhjGABJYAfdlQfhZeMcaJZm90A3", "brqrYfz4B5hgekWFZAPESnXQHcw1", "KesdyNvO1sUPJfRQxVC7bYINR4u2"];
+      const isAdmin = adminUIDs.includes(user.uid);
+      const displayName = user.displayName || user.email;
+      userInfo.textContent = `${displayName}${isAdmin ? " (관리자)" : ""}`;
+
+      loginBtn.style.display = "none";
+      logoutBtn.style.display = "block";
+    } else {
+      userInfo.textContent = "로그인 해주세요.";
+      loginBtn.style.display = "block";
+      logoutBtn.style.display = "none";
+    }
+  });
+
+  // 구글 로그인
+  function signInWithGoogle() {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(provider).catch(alert);
+  }
+
+  const postListElement = document.getElementById('postList');
+  const searchInput = document.getElementById('searchInput');
+
+  let allPosts = [];
+
+  // 🔥 게시글 불러오기
+  db.ref("posts").on("value", (snapshot) => {
+    const data = snapshot.val();
+    allPosts = [];
+
+    for (let id in data) {
+      allPosts.push({
+        id: id,
+        ...data[id],
+      });
+    }
+
+  });
+
+  // // 🔍 렌더링 + 검색
+  // function renderPosts(posts) {
+  //   // postListElement.innerHTML = "";
+  //   posts.forEach((post) => {
+  //     const li = document.createElement("li");
+  //     li.innerHTML = `<strong>${post.title}</strong><br>${post.content}`;
+  //     postListElement.appendChild(li);
+  //   });
+  // }
+
+
+
+  // 로그아웃
+  function signOut() {
+    auth.signOut().catch(alert);
+  }
+
+  // 페이지 전환 및 게시글 불러오기
+  async function switchPage(page) {
+    const postList = document.getElementById("postGrid");
+    postList.innerHTML = "";
+
+    if (page === "official") {
+      const snapshot = await db.ref("posts").once("value");
+      const data = snapshot.val() || {};
+
+      let allPosts = Object.entries(data).flatMap(([board, posts]) =>
+              Object.entries(posts).map(([id, post]) => ({
+                id,
+                ...post,
+              }))
+      );
+
+      allPosts = await Promise.all(
+              allPosts.map(async (post) => {
+                const commentSnap = await db.ref(`comments/${post.id}`).once("value");
+                const commentCount = commentSnap.exists()
+                        ? Object.keys(commentSnap.val()).length
+                        : 0;
+                return { ...post, commentCount };
+              })
+      );
+
+      if (page === "official") {
+        allPosts = allPosts.filter(
+                (post) => post.title?.includes("[공식]") || post.content?.includes("[공식]")
+        );
+      }
+
+      allPosts.sort((a, b) => (b.likes || 0) + (b.commentCount || 0) - (a.likes || 0) - (a.commentCount || 0));
+      allPosts.forEach(createPostCard);
+    }     if (page === "popular") {
+      // 모든 게시판 글 합쳐서 인기글 기준 정렬
+      const boards = ["home", "new", "official"];
+      let allPosts = [];
+
+      for (const board of boards) {
+        const snapshot = await db.ref(`posts/${board}`).once("value");
+        const data = snapshot.val() || {};
+        const posts = Object.values(data);
+        allPosts = allPosts.concat(posts);
+      }
+
+      // 댓글 수 포함
+      allPosts = await Promise.all(
+              allPosts.map(async (post) => {
+                const commentSnap = await db.ref(`comments/${post.id}`).once("value");
+                const commentCount = commentSnap.exists()
+                        ? Object.keys(commentSnap.val()).length
+                        : 0;
+                return { ...post, commentCount };
+              })
+      );
+
+      // 좋아요 + 댓글 수 합산 내림차순 정렬
+      allPosts.sort(
+              (a, b) => (b.likes || 0) + (b.commentCount || 0) - (a.likes || 0) - (a.commentCount || 0)
+      );
+
+      allPosts.forEach(createPostCard);
+    } else {
+      // 특정 게시판 글 로딩
+      const snapshot = await db.ref(`posts/${page}`).once("value");
+      const data = snapshot.val() || {};
+      let posts = Object.values(data);
+
+      posts = await Promise.all(
+              posts.map(async (post) => {
+                const commentSnap = await db.ref(`comments/${post.id}`).once("value");
+                const commentCount = commentSnap.exists()
+                        ? Object.keys(commentSnap.val()).length
+                        : 0;
+                return { ...post, commentCount };
+              })
+      );
+
+
+      posts.forEach(createPostCard);
+    }
+
+    document.querySelectorAll(".sidebar a").forEach((a) => a.classList.remove("active"));
+    const activeLink = document.getElementById(`menu-${page}`);
+    if (activeLink) activeLink.classList.add("active");
+  }
+
+  // 포스트잇 카드 생성 (작성자 노출 X)
+  function createPostCard(post) {
+    const card = document.createElement("div");
+    card.className = "post-it";
+    card.style.setProperty("--rand", Math.random().toFixed(100));
+    card.innerHTML = `<div class="pin"></div>${post.title}`;
+    card.onclick = () => showDetail(post);
+    document.getElementById("postGrid").appendChild(card);
+  }
+
+  // 새 글쓰기 모달 열기
+  function openModal() {
+    if (!currentUser) return alert("로그인해주세요.");
+    if (currentPage === "official")
+      return alert("공식게시판에 게시물 글을 올리수 없습니다.");
+
+    editingPostId = null; // 새 글쓰기 상태
+    document.getElementById("modalTitle").textContent = "글쓰기";
+    document.getElementById("submitBtn").textContent = "올리기";
+    document.getElementById("titleInput").value = "";
+    document.getElementById("contentInput").value = "";
+    document.getElementById("imageInput").value = "";
+    document.getElementById("writeModal").style.display = "flex";
+  }
+
+  // 모달 외부 클릭 시 닫기
+  window.onclick = function (event) {
+    const modal = document.getElementById("writeModal");
+    if (event.target === modal) modal.style.display = "none";
+  };
+
+  // 글쓰기 or 수정 제출
+  function submitPost() {
+    const titleInput = document.getElementById("titleInput");
+    const contentInput = document.getElementById("contentInput");
+    const imageInput = document.getElementById("imageInput");
+    const isOfficialPost = document.getElementById("isOfficialPost");
+    const adminUIDs = ["iLhjGABJYAfdlQfhZeMcaJZm90A3", "brqrYfz4B5hgekWFZAPESnXQHcw1", "KesdyNvO1sUPJfRQxVC7bYINR4u2"];
+    const isOfficial = isOfficialPost?.checked && adminUIDs.includes(auth.currentUser.uid);
+    const title = isOfficial
+            ? `📢 [공식] ${titleInput.value.trim()}`
+            : titleInput.value.trim();
+    const content = contentInput.value.trim();
+    const image = imageInput.value.trim();
+
+    if (!title) return alert("제목을 입력해주세요.");
+
+    const isAdmin = adminUIDs.includes(auth.currentUser.uid);
+
+
+    //     async function checkWithGemini(text) {
+    //       const API_KEY = "AIzaSyDSaoFO171HN6tx04abY3Em28ngIlxtk18";
+    //       const MODEL_NAME = "gemini-2.0-flash";
+    //
+    //       // 검열용 질문 예시 — 부적절한 내용인지 yes/no로 답변 요청
+    //       const prompt = `아래 문장이 부적절하거나 욕설, 공격적인 표현을 포함하는지 'yes' 또는 'no'로만 대답해줘:\n\n${text}`;
+    //
+    //       try {
+    //         const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`, {
+    //           method: "POST",
+    //           headers: { "Content-Type": "application/json" },
+    //           body: JSON.stringify({
+    //             contents: [{
+    //               parts: [{
+    //                 text: prompt
+    //               }]
+    //             }]
+    //           })
+    //         });
+    //
+    //         const data = await res.json();
+    //         const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text.toLowerCase();
+    //
+    //         // "yes" 포함하면 부적절 판단
+    //         return reply.includes("yes");
+    //         console.log(reply);
+    // } catch (error) {
+    //         console.error("Gemini API 호출 오류:", error);
+    //         // 오류시 안전하게 부적절 처리 안함(원하는 대로 수정 가능)
+    //         return false;
+    //       }
+    //     }
+    //  checkWithGemini((content)
+    if (!isAdmin) {
+      for (let word of bannedWords) {
+        if (title.includes(word) || content.includes(word)) {
+          alert(`금지어 "${word}"가 포함되어 있습니다. 게시글을 등록할 수 없습니다.`);
+          return;
+        }
+      }
+    }
+
+    const timestamp = Date.now();
+
+    if (editingPostId !== null) {
+      if (!title.includes(" (수정됨)")) title += " (수정됨)";
+      db.ref(`posts/${currentPage}/${editingPostId}`)
+              .once("value")
+              .then((snapshot) => {
+                const oldPost = snapshot.val();
+                if (!oldPost) return alert("글을 찾을 수 없습니다.");
+                const updatedPost = {
+                  ...oldPost,
+                  title,
+                  content,
+                  image,
+                  timestamp
+                };
+                db.ref(`posts/${currentPage}/${editingPostId}`).set(updatedPost);
+                switchPage(currentPage);
+                document.getElementById("writeModal").style.display = "none";
+              });
+    } else {
+      const id = Date.now();
+      const author = currentUser.displayName || currentUser.email || "익명";
+      const post = {
+        id,
+        title,
+        content,
+        image,
+        likes: 0,
+        author,
+        timestamp,
+        authorUid: currentUser.uid,
+        views: 0,  // ✅ 조회수 필드 추가
+        ip: userIp  // ✅ 저장,
+      };
+      db.ref(`posts/${currentPage}/${id}`).set(post);
+      switchPage(currentPage);
+      document.getElementById("writeModal").style.display = "none";
+    }
+
+    titleInput.value = "";
+    contentInput.value = "";
+    imageInput.value = "";
+  }
+
+  function renderPosts(posts) {
+    posts.forEach(post => {
+      const postDiv = document.createElement("div");
+      postDiv.className = "post";
+
+      const title = document.createElement("h3");
+      title.textContent = post.title || "(제목 없음)";
+      postDiv.appendChild(title);
+
+      const content = document.createElement("p");
+      content.textContent = post.content || "";
+      postDiv.appendChild(content);
+
+      const author = document.createElement("small");
+      author.textContent = post.author || "";
+      postDiv.appendChild(author);
+
+      postsDiv.appendChild(postDiv);
+    });
+  }
+  // searchInput.addEventListener("input", function () {
+  //   const keyword = searchInput.value.toLowerCase();
+  //   const filtered = allPosts.filter(post =>
+  //           post.title && post.title.toLowerCase().includes(keyword)
+  //   );
+  //   renderPosts(filtered);
+  // });
+  // 🔍 검색 이벤트
+  // 미디어 렌더링 (이미지, 동영상, 오디오, 유튜브)
+  function renderMedia(url) {
+    const ext = url.split(".").pop().toLowerCase();
+    const ytRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/;
+    const match = url.match(ytRegex);
+    if (match && match[1]) {
+      return `<iframe width="100%" height="315" src="https://www.youtube.com/embed/${match[1]}" frameborder="0" allowfullscreen style="margin:10px 0;"></iframe>`;
+    }
+    if (["mp4", "m4a"].includes(ext)) {
+      return `<video controls style="max-width:100%; margin:10px 0;"><source src="${url}" type="video/${ext}">Not supported</video>`;
+    }
+    if (["mp3", "wav"].includes(ext)) {
+      return `<audio controls style="width:100%; margin:10px 0;"><source src="${url}" type="audio/${ext}">Not supported</audio>`;
+    }
+    return `<img src="${url}" style="max-width:100%; margin:10px 0;">`;
+  }
+
+  // 게시글 상세보기 (작성자 표시, 본문 수정 가능)
+  async function showDetail(post) {
+    const postRef = db.ref(`posts/${currentPage}/${post.id}`);
+
+    try {
+      let shouldIncreaseView = false;
+
+      if (currentUser) {
+        // 로그인된 사용자
+        const viewRef = db.ref(`views/${post.id}/${currentUser.uid}`);
+        const viewSnapshot = await viewRef.once("value");
+        if (!viewSnapshot.exists()) {
+          await viewRef.set(true);
+          shouldIncreaseView = true;
+        }
+      } else {
+        // 비회원 사용자의 조회 기록은 localStorage에 저장
+        const viewedPosts = JSON.parse(localStorage.getItem("viewedPosts") || "{}");
+        if (!viewedPosts[post.id]) {
+          viewedPosts[post.id] = true;
+          localStorage.setItem("viewedPosts", JSON.stringify(viewedPosts));
+          shouldIncreaseView = true;
+        }
+      }
+
+      // 조회수 증가 (최초 1회만)
+      if (shouldIncreaseView) {
+        await postRef.child('views').transaction(current => (current || 0) + 1);
+      }
+
+      // 최신 데이터 다시 불러오기
+      const snapshot = await postRef.once("value");
+      if (snapshot.exists()) {
+        post = snapshot.val();
+      }
+
+
+      const adminUIDs = ["iLhjGABJYAfdlQfhZeMcaJZm90A3", "brqrYfz4B5hgekWFZAPESnXQHcw1", "KesdyNvO1sUPJfRQxVC7bYINR4u2"];
+      const isAdmin = currentUser && adminUIDs.includes(currentUser.uid);
+      const deleteBtn = isAdmin ? `<button onclick="deletePost(${post.id})" style="float:right; color:red;">🗑️ 삭제</button>` : "";
+      const detail = document.getElementById("postDetail");
+      const date = post.timestamp
+              ? new Date(post.timestamp).toLocaleString("ko-KR", { timeZone: "Asia/Seoul" })
+              : "알 수 없음";
+
+      const timestampHtml = `<div class="timestamp"><b>작성 시각:</b> ${date}</div>`;
+      const maskedIp = post.ip
+              ? post.ip.split('.').slice(0, 2).join('.') + '.*.*'
+              : '?.?.*.*';
+      // 기존 상세 HTML 안에 삽입
+      function formatAuthorName(rawName) {
+        const match = rawName.match(/^605\d{2}(.*)$/);
+        return match ? match[1].trim() : rawName;
+      }
+      function openReportModal(postId, title) {
+        closeDetail();
+        reportingPost = { id: postId, title };
+        document.getElementById("reportReason").value = "";
+        document.getElementById("reportModal").style.display = "block";
+      }
+      detail.innerHTML = `
+        <button class="close-btn" onclick="closeDetail()">×</button>
+        <h2>${escapeHtml(post.title)}</h2>
+        ${deleteBtn}
+        ${post.image ? renderMedia(post.image) : ""}
+        <p style="white-space: pre-wrap;">${escapeHtml(post.content)}</p><br />
+        <div style="font-size : 15px  "> 조회수 ${post.views || 0}회<br /><b>작성자:</b> ${escapeHtml(formatAuthorName(post.author || "익명"))} (${maskedIp})</div>
+        ${timestampHtml}
+  <button onclick="openReportModal('${post.id}', '${post.title.replace(/'/g, "\\'")}')">🚨 신고하기</button>
+        <div class="likes-comments">
+          <button id="like-btn-${post.id}" onclick="likePost(${post.id})">❤️ 좋아요 (<span id="like-count-${post.id}">${post.likes || 0}</span>)</button>
+        </div>
+        <div style="margin-top:20px;">
+          <h3>💬 댓글</h3>
+          <div id="comments-${post.id}" style="margin-bottom: 10px;"></div>
+          <input id="comment-input-${post.id}" type="text" placeholder="댓글 입력" style="width: 80%; padding: 5px;" />
+          <button onclick="addComment(${post.id})" style="padding: 5px 10px;">작성</button>
+        </div>
+      `;
+      detail.style.display = "block";
+      renderComments(post.id);
+    } catch (error) {
+      console.error("조회수 증가 중 오류:", error);
+      alert("게시글을 불러오는 중 오류가 발생했습니다.");
+    }
+  }
+
+  // HTML 이스케이프 함수 (XSS 방지)
+  function escapeHtml(text) {
+    if (!text) return "";
+    return text
+            .toString()
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+  }
+
+  // 좋아요 누르기
+  function likePost(id) {
+    if (!currentUser) return alert("로그인 후 좋아요를 눌러주세요.");
+    if (likedSet.has(id)) return alert("이미 좋아요를 누르셨어요!");
+    likedSet.add(id);
+
+    // 현재 페이지가 인기글일 경우, 각 게시판 중 어느 것인지 찾아야 함
+    // 간단히 현재 페이지 기준으로만 처리 (복잡도 고려)
+    const ref = db.ref(`posts/${currentPage}/${id}/likes`);
+    ref
+            .transaction((currentLikes) => {
+              return (currentLikes || 0) + 1;
+            })
+            .then(() => {
+              // 좋아요 카운트 즉시 UI 반영
+              const likeCountSpan = document.getElementById(`like-count-${id}`);
+              if (likeCountSpan) {
+                likeCountSpan.innerText = Number(likeCountSpan.innerText) + 1;
+              }
+              switchPage(currentPage);
+            });
+  }
+
+  // 댓글 작성 (댓글은 { author, text } 객체로 저장)
+  function addComment(id) {
+    if (!currentUser) return alert("로그인 후 댓글을 작성해주세요.");
+    const input = document.getElementById(`comment-input-${id}`);
+    const text = input.value.trim();
+    if (!text) return;
+
+    const commentData = {
+      author: currentUser.displayName || currentUser.email || "익명",
+      text,
+    };
+
+    db.ref(`comments/${id}`).push(commentData).then(() => {
+      input.value = "";
+      renderComments(id);
+    });
+  }
+
+  // 댓글 다시 렌더 (실제로 상세보기에서만 호출됨)
+  function renderComments(postId) {
+    function formatAuthorName(rawName) {
+      const match = rawName.match(/^605\d{2}(.*)$/);
+      return match ? match[1].trim() : rawName;
+    }
+    const commentsRef = db.ref(`comments/${postId}`);
+    commentsRef.off(); // 기존 리스너 제거
+    commentsRef.on("value", (snapshot) => {
+      const commentsDiv = document.getElementById(`comments-${postId}`);
+      commentsDiv.innerHTML = "";
+
+      snapshot.forEach((childSnapshot) => {
+        const comment = childSnapshot.val();
+        const key = childSnapshot.key;
+
+        const adminUIDs = ["iLhjGABJYAfdlQfhZeMcaJZm90A3", "brqrYfz4B5hgekWFZAPESnXQHcw1", "KesdyNvO1sUPJfRQxVC7bYINR4u2"];
+        const isAdmin = currentUser && adminUIDs.includes(currentUser.uid);
+        const isAuthor = currentUser && comment.uid === currentUser.uid;
+        const showDelete = isAdmin || isAuthor;
+
+        const commentElement = document.createElement("div");
+        commentElement.innerHTML = `
+          <b>${escapeHtml(formatAuthorName(comment.author || "익명"))}: ${escapeHtml(comment.text || "")}
+          ${showDelete ? `<button onclick="deleteComment(${postId}, '${key}')" style="color:red; float:right;">삭제</button>` : ""}
+        `;
+        commentsDiv.appendChild(commentElement);
+      });
+    });
+  }
+
+  function deleteComment(postId, commentId) {
+    if (confirm("정말 이 댓글을 삭제하시겠습니까?")) {
+      db.ref(`comments/${postId}/${commentId}`).remove();
+    }
+  }
+
+  function deletePost(postId) {
+    if (!confirm("정말 이 게시글을 삭제하시겠습니까?")) return;
+    db.ref(`posts/${currentPage}/${postId}`).remove().then(() => {
+      closeDetail();
+      switchPage(currentPage); // 새로고침
+    });
+  }
+
+
+  // 수정 시작: 상세보기 모달에서 수정 버튼 누르면 글쓰기 모달 열기 + 기존 내용 세팅
+  function startEditPost(postId) {
+    if (!currentUser) return alert("로그인해주세요.");
+    // 현재 페이지에서 해당 게시글 불러오기
+    db.ref(`posts/${currentPage}/${postId}`)
+            .once("value")
+            .then((snapshot) => {
+              const post = snapshot.val();
+              if (!post) return alert("글을 찾을 수 없습니다.");
+              if (
+                      !(
+                              currentUser.uid === post.authorUid ||
+                              currentUser.email === post.author
+                      )
+              ) {
+                return alert("본인 글만 수정할 수 있습니다.");
+              }
+              editingPostId = postId;
+              document.getElementById("modalTitle").textContent = "글 수정";
+              document.getElementById("submitBtn").textContent = "수정완료";
+              document.getElementById("titleInput").value = post.title.replace(
+                      " (수정됨)",
+                      ""
+              );
+              document.getElementById("contentInput").value = post.content;
+              document.getElementById("imageInput").value = post.image || "";
+              document.getElementById("writeModal").style.display = "flex";
+              closeDetail();
+            });
+  }
+
+  // 초기 페이지 로딩
+  switchPage("home");
+</script>
+<script>
+  const API_KEY = "ecdd5e02250c425885ffc2da5742019b";
+  const ATPT_OFCDC_SC_CODE = "B10";
+  const SD_SCHUL_CODE = "7091380";
+
+  function addMealToContent() {
+    const dateInput = document.getElementById("mealDate");
+    const contentInput = document.getElementById("contentInput");
+
+    if (!dateInput.value) {
+      alert("날짜를 선택해주세요.");
+      return;
+    }
+
+    const date = new Date(dateInput.value);
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    const fullDate = `${y}${m}${d}`;
+
+    const url = `https://open.neis.go.kr/hub/mealServiceDietInfo?KEY=${API_KEY}&ATPT_OFCDC_SC_CODE=${ATPT_OFCDC_SC_CODE}&SD_SCHUL_CODE=${SD_SCHUL_CODE}&MLSV_YMD=${fullDate}&Type=json`;
+
+    fetch(url)
+            .then(res => res.json())
+            .then(json => {
+              if (!json.mealServiceDietInfo || !json.mealServiceDietInfo[1]) {
+                throw new Error("선택한 날짜에 급식 정보가 없습니다.");
+              }
+
+              const meal = json.mealServiceDietInfo[1].row[0];
+              let menu = meal.DDISH_NM
+                      .replace(/<br\/>/g, '\n')
+                      .replace(/\./g, '')
+                      .replace(/우유\s*\(\d+\)/g, '')
+                      .replace(/\s{2,}/g, '\n')
+                      .trim();
+
+              const text = `\n\n🍽️ [${meal.MMEAL_SC_NM}] ${meal.MLSV_YMD}\n${menu}`;
+              contentInput.value += text;
+              alert("급식 정보가 글 내용에 추가되었습니다.");
+            })
+            .catch(err => {
+              alert(err.message || "급식 정보를 불러오지 못했습니다.");
+            });
+  }
+</script>
+</body>
+</html>
