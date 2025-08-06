@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+    <title>d/Class</title>
+    <style>
+        body {
+            background: #333;
+            color: white;
+            font-family: sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+        canvas {
+            border: 2px solid white;
+            image-rendering: pixelated;
+            margin-top: 10px;
+            max-width: 100%;
+            height: auto;
+            touch-action: none;
+        }
+        #palette {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 1rem;
+            padding: 0 10px;
+        }
+        .color-btn {
+            width: 32px;
+            height: 32px;
+            border: 2px solid #444;
+            cursor: pointer;
+            border-radius: 6px;
+        }
+        .color-btn.selected {
+            outline: 3px solid #fff;
+            box-shadow: 0 0 5px #000;
+        }
+        #controls {
+            margin-top: 1rem;
+            display: none;
+        }
+        #controls button {
+            font-size: 20px;
+            padding: 10px 16px;
+            margin: 4px;
+            background: #555;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        #status, #cooldownTimer {
+            margin-top: 1rem;
+            font-size: 1rem;
+        }
+        #loginBtn, #toggleGrid {
+            margin: 1rem auto;
+            padding: 0.6rem 1.2rem;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 6px;
+            background: #eee;
+            border: 1px solid #aaa;
+        }
+        h1 {
+            font-size: 1.5rem;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+<h1>D/Class</h1>
+<canvas id="board" width="1010" height="1010"></canvas><br />
+<div id="positionDisplay">위치: x: -, y: -</div>
+<button id="toggleGrid">그리드 켜기</button>
+<div id="palette"></div>
+<div id="controls">
+        <div><button id="up">↑</button></div>
+        <div>
+            <button id="left">←</button>
+            <button id="place">O</button>
+            <button id="right">→</button>
+        </div>
+        <div><button id="down">↓</button></div>
+    </div>
+    <div id="cooldownTimer"></div>
+    <div id="status">캔버스를 수정하시려면 로그인이 필요합니다.</div>
+    <button id="loginBtn">Google 로그인</button>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import {
+        getDatabase, ref, onValue, set, onChildChanged, onChildAdded, get
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    import {
+        getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyBfXN5Gy6KX1ThZ92zDY7MXrMMzMF2Ceqo",
+        authDomain: "boofuck-dns.firebaseapp.com",
+        databaseURL: "https://boofuck-dns-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "boofuck-dns",
+        storageBucket: "boofuck-dns.firebasestorage.app",
+        messagingSenderId: "594205078724",
+        appId: "1:594205078724:web:c364d1ba8cc2bd6d140591",
+        measurementId: "G-1EX9H2KHDL",
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth();
+    const provider = new GoogleAuthProvider();
+
+    const canvas = document.getElementById("board");
+    const ctx = canvas.getContext("2d");
+    const PIXEL_SIZE = 10;
+    const SIZE = 101;
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    let showGrid = false;
+
+    const COLORS = [
+        "#FFFFFF", "#C0C0C0", "#000000", "#FFC0CB", "#FF0000",
+        "#A52A2A", "#FFA500", "#FFD700", "#ADFF2F",
+        "#00FFFF", "#00CED1", "#0000FF", "#8A2BE2", "#800080"
+    ];
+
+    let selectedColor = COLORS[0];
+    let currentUser = null;
+    const lastPlacedMap = {};
+    let cooldownInterval = null;
+    let cursorX = 50, cursorY = 50;
+    let pixels = {};
+
+    function drawPixel(x, y, color) {
+        ctx.fillStyle = color;
+        ctx.fillRect(x * PIXEL_SIZE, y * PIXEL_SIZE, PIXEL_SIZE, PIXEL_SIZE);
+    }
+    canvas.addEventListener("click", e => {
+        if (isMobile) return;
+        const rect = canvas.getBoundingClientRect();
+        const x = Math.floor((e.clientX - rect.left) / PIXEL_SIZE);
+        const y = Math.floor((e.clientY - rect.top) / PIXEL_SIZE);
+        cursorX = x;
+        cursorY = y;
+        drawCursor();
+        document.getElementById("positionDisplay").innerText = `위치: x: ${cursorX}, y: ${cursorY}`;
+        placePixel();
+    });
+
+    function drawAllPixels() {
+        ctx.fillStyle = "#FFFFFF";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        for (const key in pixels) {
+            const [x, y] = key.split("_").map(Number);
+            drawPixel(x, y, pixels[key].color);
+        }
+
+        if (showGrid) {
+            ctx.strokeStyle = "#ccc";
+            ctx.lineWidth = 0.5;
+
+            for (let x = 0; x <= SIZE; x++) {
+                ctx.beginPath();
+                ctx.moveTo(x * PIXEL_SIZE, 0);
+                ctx.lineTo(x * PIXEL_SIZE, canvas.height);
+                ctx.stroke();
+            }
+
+            for (let y = 0; y <= SIZE; y++) {
+                ctx.beginPath();
+                ctx.moveTo(0, y * PIXEL_SIZE);
+                ctx.lineTo(canvas.width, y * PIXEL_SIZE);
+                ctx.stroke();
+            }
+        }
+    }
+
+    function drawCursor() {
+        drawAllPixels();
+        ctx.strokeStyle = "orange";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(cursorX * PIXEL_SIZE, cursorY * PIXEL_SIZE, PIXEL_SIZE, PIXEL_SIZE);
+        drawMagnifier();
+    }
+
+    function moveCursor(dx, dy) {
+        cursorX = Math.max(0, Math.min(SIZE - 1, cursorX + dx));
+        cursorY = Math.max(0, Math.min(SIZE - 1, cursorY + dy));
+        drawCursor();
+        document.getElementById("positionDisplay").innerText = `위치: x: ${cursorX}, y: ${cursorY}`;
+    }
+
+    async function placePixel() {
+        if (!currentUser) return alert("로그인 후 사용 가능합니다.");
+        const now = Date.now();
+        const last = lastPlacedMap[currentUser.uid] || 0;
+        if (now - last < 60000) {
+            const seconds = Math.ceil((60000 - (now - last)) / 1000);
+            startCooldownTimer(currentUser.uid, last);
+            if(seconds<60)
+            return alert(`쿨타임: ${seconds}초 후 다시 시도하세요`);
+        }
+
+        lastPlacedMap[currentUser.uid] = now;
+        await set(ref(db, `cooldowns/${currentUser.uid}`), now);
+        startCooldownTimer(currentUser.uid, now);
+
+        await set(ref(db, `pixels/${cursorX}_${cursorY}`), {
+            color: selectedColor,
+            user: currentUser.uid,
+            name: currentUser.displayName,  // 추가된 부분
+            timestamp: now
+        });
+    }
+
+    function startCooldownTimer(uid, startTime) {
+        const timerDisplay = document.getElementById("cooldownTimer");
+        clearInterval(cooldownInterval);
+        cooldownInterval = setInterval(() => {
+            const now = Date.now();
+            const remaining = 60000 - (now - startTime);
+            if (remaining <= 0) {
+                clearInterval(cooldownInterval);
+                timerDisplay.innerText = "";
+            } else {
+                timerDisplay.innerText = `⏳ 남은 쿨타임: ${Math.ceil(remaining / 1000)}초`;
+            }
+        }, 500);
+    }
+
+    canvas.addEventListener("click", e => {
+        if (isMobile) return;
+        const rect = canvas.getBoundingClientRect();
+        const x = Math.floor((e.clientX - rect.left) / PIXEL_SIZE);
+        const y = Math.floor((e.clientY - rect.top) / PIXEL_SIZE);
+        cursorX = x;
+        cursorY = y;
+        drawCursor();
+        placePixel();
+    });
+
+    document.getElementById("toggleGrid").onclick = () => {
+        showGrid = !showGrid;
+        document.getElementById("toggleGrid").innerText = showGrid ? "그리드 끄기" : "그리드 켜기";
+        drawCursor();
+    };
+
+    const palette = document.getElementById("palette");
+    COLORS.forEach(color => {
+        const btn = document.createElement("div");
+        btn.className = "color-btn";
+        btn.style.backgroundColor = color;
+        btn.onclick = () => {
+            selectedColor = color;
+            document.querySelectorAll(".color-btn").forEach(b => b.classList.remove("selected"));
+            btn.classList.add("selected");
+        };
+        if (color === selectedColor) btn.classList.add("selected");
+        palette.appendChild(btn);
+    });
+
+    const loginBtn = document.getElementById("loginBtn");
+    loginBtn.onclick = () => {
+        if (currentUser) {
+            signOut(auth);
+        } else {
+            signInWithPopup(auth, provider).catch(console.error);
+        }
+    };
+
+    onAuthStateChanged(auth, user => {
+        currentUser = user;
+        const status = document.getElementById("status");
+        if (user) {
+            status.innerText = `환영합니다, ${user.displayName}`;
+            loginBtn.innerText = "로그아웃";
+
+            get(ref(db, `cooldowns/${user.uid}`)).then(snapshot => {
+                const last = snapshot.val();
+                if (last) {
+                    lastPlacedMap[user.uid] = last;
+                    const now = Date.now();
+                    if (now - last < 60000) {
+                        startCooldownTimer(user.uid, last);
+                    }
+                }
+            });
+        } else {
+            status.innerText = "캔버스를 수정하시려면 로그인이 필요합니다.";
+            loginBtn.innerText = "Google 로그인";
+        }
+    });
+
+    get(ref(db, "pixels")).then(snapshot => {
+        const data = snapshot.val();
+        if (!data) return;
+        pixels = data;
+        if (isMobile) drawCursor();
+    });
+
+    onChildChanged(ref(db, "pixels"), snapshot => {
+        const key = snapshot.key;
+        pixels[key] = snapshot.val();
+        if (isMobile) drawCursor(); else drawAllPixels();
+    });
+
+    onChildAdded(ref(db, "pixels"), snapshot => {
+        const key = snapshot.key;
+        pixels[key] = snapshot.val();
+        if (isMobile) drawCursor(); else drawAllPixels();
+    });
+
+    if (isMobile) {
+        document.getElementById("controls").style.display = "block";
+        document.getElementById("up").onclick = () => moveCursor(0, -1);
+        document.getElementById("down").onclick = () => moveCursor(0, 1);
+        document.getElementById("left").onclick = () => moveCursor(-1, 0);
+        document.getElementById("right").onclick = () => moveCursor(1, 0);
+        document.getElementById("place").onclick = () => placePixel();
+    }
+
+    // ====== [전역] 추가 ======
+    let magnify = { on: false, x: 0, y: 0 }; // 캔버스 픽셀 좌표(그리드 좌표 아님)
+    const MAG_SCALE = 4;
+    const MAG_RADIUS = 80;
+    let lastTapTime = 0;
+
+    // drawCursor 마지막 줄에 호출되도록 이 함수 추가
+    function drawMagnifier() {
+        if (!magnify.on) return;
+
+        // 커서 기준 렌즈 중앙 위치
+        const centerCanvasX = cursorX * PIXEL_SIZE + PIXEL_SIZE / 2;
+        const centerCanvasY = cursorY * PIXEL_SIZE + PIXEL_SIZE / 2;
+
+        // 렌즈 영역만 클리핑 및 확대
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(centerCanvasX, centerCanvasY, MAG_RADIUS, 0, Math.PI * 2);
+        ctx.clip();
+
+        // 렌즈 배경을 흰색으로 덮어 씌우기 → 배경 가리기
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(centerCanvasX - MAG_RADIUS, centerCanvasY - MAG_RADIUS, MAG_RADIUS * 2, MAG_RADIUS * 2);
+
+        // 확대된 픽셀 그리기
+        ctx.imageSmoothingEnabled = false;
+        ctx.translate(
+            centerCanvasX - centerCanvasX * MAG_SCALE,
+            centerCanvasY - centerCanvasY * MAG_SCALE
+        );
+        ctx.scale(MAG_SCALE, MAG_SCALE);
+
+        for (const key in pixels) {
+            const [x, y] = key.split("_").map(Number);
+            drawPixel(x, y, pixels[key].color);
+        }
+
+        ctx.restore();
+
+        // 검정색 원 테두리
+        ctx.beginPath();
+        ctx.arc(centerCanvasX, centerCanvasY, MAG_RADIUS + 0.5, 0, Math.PI * 2);
+        ctx.strokeStyle = "#000";
+        ctx.lineWidth = 4;
+        ctx.stroke();
+    }
+
+    canvas.addEventListener("touchend", (e) => {
+        const now = Date.now();
+        const delta = now - lastTapTime;
+        lastTapTime = now;
+
+        const rect = canvas.getBoundingClientRect();
+        const touch = e.changedTouches[0];
+        const x = Math.floor((touch.clientX - rect.left) / PIXEL_SIZE);
+        const y = Math.floor((touch.clientY - rect.top) / PIXEL_SIZE);
+
+        if (delta < 300) {
+            // 두 번 탭 → 렌즈 토글
+            cursorX = x;
+            cursorY = y;
+            magnify.on = !magnify.on;
+        } else {
+            // 한 번 탭 → 커서 이동
+            cursorX = x;
+            cursorY = y;
+        }
+
+        drawCursor();
+        document.getElementById("positionDisplay").innerText = `위치: x: ${cursorX}, y: ${cursorY}`;
+    }, { passive: true });
+    document.addEventListener("keydown", (e) => {
+        switch (e.key) {
+            case "ArrowUp":
+            case "PageUp":
+                moveCursor(0, -1);
+                break;
+            case "ArrowDown":
+            case "PageDown":
+                moveCursor(0, 1);
+                break;
+            case "ArrowLeft":
+                moveCursor(-1, 0);
+                break;
+            case "ArrowRight":
+                moveCursor(1, 0);
+                break;
+            case "Enter":
+            case " ":
+                placePixel();
+                break;
+        }
+    });
+
+</script>
+</body>
+</html>
+
