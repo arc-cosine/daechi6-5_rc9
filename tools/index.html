@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>자동화 링크 페이지</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            font-family: 'Pretendard', 'Segoe UI', sans-serif;
+            padding: 40px 20px;
+        }
+
+        h2 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: #343a40;
+            text-shadow: 1px 1px 0 rgba(0,0,0,0.05);
+        }
+
+        h3 {
+            font-size: 1rem;
+            color: #343a40;
+            margin-bottom: 40px;
+        }
+        a {
+            display: inline-block;
+            margin: 10px;
+            padding: 14px 28px;
+            font-size: 1rem;
+            text-decoration: none;
+            color: #fff;
+            background: #5c7cfa;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            word-break: break-word;
+            max-width: 90%;
+        }
+
+        a:hover {
+            background: #4263eb;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+    </style>
+</head>
+<body>
+<h2>✨ 자동화 스크립트 북마크 추가 ✨</h2>
+<h3>모든 스크립트들은 북마크에서 자바스크립트를 실행하는 BookMarklet 기술로 구동됩니다.</h3>
+<a href="javascript:(function(){const t=()=>{const s=localStorage.getItem('afterSave');if(s){try{const d=JSON.parse(s);if(Date.now()-d.timestamp>1800000){localStorage.removeItem('afterSave');alert('afterSave가 1시간 지나 초기화되었습니다.');}else{localStorage.removeItem('afterSave');setTimeout(()=>{const b=[...document.querySelectorAll('button')].find(x=>x.innerText.includes('급여 보내기')&&x.type==='submit');b?(b.click(),console.log('✅ 급여 보내기 버튼 자동 클릭 완료')):console.warn('❌ 급여 보내기 버튼 없음')},1000)}}catch{localStorage.removeItem('afterSave')}}};document.readyState==='loading'?document.addEventListener('DOMContentLoaded',t):t();const e=document.querySelector('input[type=&quot;submit&quot;][value^=&quot;소득세:&quot;]');if(e&&e.value!=='소득세: OFF'){alert('소득세를 OFF로 변경해주십시오!');return}try{document.querySelectorAll('input[name=&quot;checked_user_id[]&quot;]').forEach(c=>c.checked=!0);const n='$2a$10$v8MnmFSL/GoywF.qohAheOJAFCQDPmBW20gtMMHbxdN/zrkvUU1MW',o='688a2c75ae596e708fbe4cac';fetch(`https://api.jsonbin.io/v3/b/${o}/latest`,{headers:{'X-Master-Key':n}}).then(r=>{if(!r.ok)throw new Error('데이터 요청 실패');return r.json()}).then(d=>{const r=d.record.realPays||[],a=Array.from(document.querySelectorAll('input')).filter(i=>i.matches('.w-full.border.text-center'));if(r.length===0||a.length===0)throw new Error('입력값 또는 필드 없음');let c=0,t=new Date,y=t.getFullYear(),m=t.getMonth()+1,D=t.getDate(),f=new Date(y,m-1,1),w=D+f.getDay()-1,u=Math.floor(w/7);if(u===0){m-=1;m===0&&(m=12,y-=1);const t=new Date(y,m-1,1),e=new Date(y,m,0).getDate();u=Math.floor((e+t.getDay()-1)/7)}a.forEach((i,e)=>{e%2===0?i.value=`${m}월 ${u}주차`:c<r.length&&(i.value=r[c++])});setTimeout(()=>{try{const b=[...document.querySelectorAll('button')].find(b=>b.textContent.includes('저장하기')&&b.getAttribute('onclick')?.includes('/adminPage/jobSetting/saveJob'));if(!b)throw new Error('저장하기 버튼을 찾을 수 없음');localStorage.setItem('afterSave',JSON.stringify({timestamp:Date.now()}));alert('확인을 누른 후 북마크를 다시 눌러주십시오!');b.click()}catch(t){console.error('저장하기 클릭 에러:',t.message)}},1000)}).catch(e=>console.error('데이터 로딩 오류:',e.message))}catch(e){console.error('초기 처리 오류:',e.message)}})();">
+    📌 급여 자동 입력
+</a>
+
+<a href="javascript:(function(){const t=()=>{const s=localStorage.getItem('afterSave');if(s){try{const d=JSON.parse(s);if(Date.now()-d.timestamp>1800000){localStorage.removeItem('afterSave');alert('afterSave가 1시간 지나 초기화되었습니다.');}else{localStorage.removeItem('afterSave');setTimeout(()=>{const b=[...document.querySelectorAll('button')].find(x=>x.innerText.includes('급여 보내기')&&x.type==='submit');b?(b.click(),console.log('✅ 자리값 버튼 자동 클릭 완료')):console.warn('❌ 자리값 버튼 없음')},1000)}}catch{localStorage.removeItem('afterSave')}}};document.readyState==='loading'?document.addEventListener('DOMContentLoaded',t):t();const e=document.querySelector('input[type=&quot;submit&quot;][value^=&quot;소득세:&quot;]');if(e&&e.value!=='소득세: OFF'){alert('소득세를 OFF로 변경해주십시오!');return}try{document.querySelectorAll('input[name=&quot;checked_user_id[]&quot;]').forEach(c=>c.checked=!0);const n='$2a$10$v8MnmFSL/GoywF.qohAheOJAFCQDPmBW20gtMMHbxdN/zrkvUU1MW',o='68921897ae596e708fc23d80';fetch(`https://api.jsonbin.io/v3/b/${o}/latest`,{headers:{'X-Master-Key':n}}).then(r=>{if(!r.ok)throw new Error('데이터 요청 실패');return r.json()}).then(d=>{const r=d.record||[],a=Array.from(document.querySelectorAll('input')).filter(i=>i.matches('.w-full.border.text-center'));if(r.length===0||a.length===0)throw new Error('입력값 또는 필드 없음');let c=0;a.forEach((i,e)=>{if(e%2===0){i.value='자리값';}else{if(c<r.length){let v=String(r[c++]);if(!v.startsWith('-'))v='-'+v;i.value=v}}});setTimeout(()=>{try{const b=[...document.querySelectorAll('button')].find(b=>b.textContent.includes('저장하기')&&b.getAttribute('onclick')?.includes('/adminPage/jobSetting/saveJob'));if(!b)throw new Error('저장하기 버튼을 찾을 수 없음');localStorage.setItem('afterSave',JSON.stringify({timestamp:Date.now()}));alert('확인을 누른 후 북마크를 다시 눌러주십시오!');b.click()}catch(t){console.error('저장하기 클릭 에러:',t.message)}},1000)}).catch(e=>console.error('데이터 로딩 오류:',e.message))}catch(e){console.error('초기 처리 오류:',e.message)}})();">
+    🪑 자리값 자동 입력
+</a>
+
+</body>
+</html>
