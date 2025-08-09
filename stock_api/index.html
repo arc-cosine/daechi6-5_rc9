@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <title>그래프</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: 'Noto Sans KR', sans-serif; padding: 20px; }
+        canvas { max-width: 600px; max-height: 400px; }
+    </style>
+</head>
+<body>
+<h2></h2>
+<canvas id="lineChart"></canvas>
+
+<script>
+    const binId = '68974accae596e708fc5efb2';  // jsonbin bin ID
+    const apiKey = '$2a$10$v8MnmFSL/GoywF.qohAheOJAFCQDPmBW20gtMMHbxdN/zrkvUU1MW';  // jsonbin 마스터키
+
+    async function fetchData() {
+        try {
+            const res = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
+                headers: { 'X-Master-Key': apiKey }
+            });
+            if (!res.ok) throw new Error('데이터 불러오기 실패: ' + res.status);
+
+            const json = await res.json();
+            const data = json.record?.data || [];
+
+            if (!data.length) {
+                alert('저장된 데이터가 없습니다.');
+                return [];
+            }
+            return data.map(Number);
+        } catch (e) {
+            alert('오류: ' + e.message);
+            return [];
+        }
+    }
+
+    async function drawChart() {
+        const data = await fetchData();
+        if (data.length === 0) return;
+
+        // 홀수번째 (인덱스 0,2,4...) 값 배열
+        const firstData = data.filter((_, i) => i % 2 === 0);
+        // 짝수번째 (인덱스 1,3,5...) 값 배열
+        const secondData = data.filter((_, i) => i % 2 === 1);
+
+        // labels는 두 그래프 모두 동일하게, 두 배열 중 더 긴 쪽 길이에 맞춤
+        const maxLen = Math.max(firstData.length, secondData.length);
+        const labels = Array.from({length: maxLen}, (_, i) => `#${i + 1}`);
+
+        const ctx = document.getElementById('lineChart').getContext('2d');
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: '대통령 감량 프로젝트',
+                        data: firstData,
+                        fill: false,
+                        borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.2
+                    },
+                    {
+                        label: '대통령 증량 프로젝트',
+                        data: secondData,
+                        fill: false,
+                        borderColor: 'rgb(192, 75, 192)',
+                        tension: 0.2
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: true, position: 'top' },
+                    tooltip: { enabled: true }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        suggestedMin: Math.min(...data) - 5,
+                        suggestedMax: Math.max(...data) + 5
+                    }
+                }
+            }
+        });
+    }
+
+    drawChart();
+</script>
+</body>
+</html>
