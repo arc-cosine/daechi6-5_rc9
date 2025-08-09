@@ -53,6 +53,29 @@
             transform: translateY(-2px);
             box-shadow: 0 8px 20px rgba(0,0,0,0.15);
         }
+        #mobile-fullscreen-message {
+            display: none;
+        }
+
+        /* 모바일(가로 768px 이하)일 때 전체화면 메시지 보이기 */
+        @media (max-width: 1000px) {
+            #mobile-fullscreen-message {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                position: fixed;
+                top: 0; left: 0;
+                width: 100vw;
+                height: 100vh;
+                background-color: black;
+                color: white;
+                font-size: 2rem;
+                text-align: center;
+                padding: 1rem;
+                box-sizing: border-box;
+                z-index: 9999;
+            }
+        }
     </style>
 </head>
 <body>
@@ -69,5 +92,8 @@
 <a href="https://github.com/arc-cosine/daechi6-5_rc9/raw/refs/heads/main/stock_api/extension.zip">
     💸 증권 통계 스크립트 설치
 </a>
+<div id="mobile-fullscreen-message">
+    컴퓨터에서 이용해 주세요.
+</div>
 </body>
 </html>
