@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DNS 관리자 페이지</title>
+    <style>
+        table { border-collapse: collapse; width: 400px; margin: 20px auto; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+        input { width: 90%; padding: 4px; }
+        button { cursor: pointer; }
+        #addRowBtn { width: 100%; padding: 6px; }
+        #content { display: none; }
+    </style>
+</head>
+<body>
+
+<div id="content">
+
+    <h2 style="text-align:center;">차단 이메일 관리</h2>
+    <table id="emailTable">
+        <thead>
+        <tr><th>삭제</th><th>사용자 이메일</th></tr>
+        </thead>
+        <tbody></tbody>
+        <tfoot>
+        <tr>
+            <td colspan="2"><button id="addRowBtn">+ 이메일 추가</button></td>
+        </tr>
+        </tfoot>
+    </table>
+
+</div>
+
+<script>
+    const PASSWORD = "murimurievolution";  // 원하는 비밀번호로 변경하세요
+
+    const BIN_ID = "68989c58ae596e708fc6af4a"; // jsonbin bin id
+    const API_KEY = "$2a$10$v8MnmFSL/GoywF.qohAheOJAFCQDPmBW20gtMMHbxdN/zrkvUU1MW"; // jsonbin secret key
+    const API_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+
+    let blockedEmails = [];
+
+    async function loadEmails() {
+        try {
+            const res = await fetch(API_URL + "/latest", {
+                headers: { "X-Master-Key": API_KEY }
+            });
+            const data = await res.json();
+            blockedEmails = data.record.blockedEmails || [];
+            renderTable();
+        } catch (e) {
+            alert("데이터 로드 실패: " + e.message);
+        }
+    }
+
+    async function saveEmails() {
+        try {
+            const res = await fetch(API_URL, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-Master-Key": API_KEY,
+                    "X-Bin-Versioning": "false"
+                },
+                body: JSON.stringify({ blockedEmails })
+            });
+            if (!res.ok) throw new Error("저장 실패");
+        } catch (e) {
+            alert("저장 실패: " + e.message);
+        }
+    }
+
+    function renderTable() {
+        const tbody = document.querySelector("#emailTable tbody");
+        tbody.innerHTML = "";
+        blockedEmails.forEach((email, idx) => {
+            const tr = document.createElement("tr");
+
+            const tdDel = document.createElement("td");
+            const delBtn = document.createElement("button");
+            delBtn.textContent = "X";
+            delBtn.style.color = "red";
+            delBtn.addEventListener("click", () => {
+                if(confirm(`"${email}" 이메일을 차단 목록에서 삭제하시겠습니까?`)) {
+                    blockedEmails.splice(idx, 1);
+                    saveEmails().then(renderTable);
+                }
+            });
+            tdDel.appendChild(delBtn);
+            tr.appendChild(tdDel);
+
+            const tdEmail = document.createElement("td");
+            const input = document.createElement("input");
+            input.type = "email";
+            input.value = email;
+            input.required = true;
+            input.addEventListener("change", () => {
+                const val = input.value.trim().toLowerCase();
+                if (!val || !validateEmail(val)) {
+                    alert("유효한 이메일을 입력하세요.");
+                    input.value = blockedEmails[idx];
+                    return;
+                }
+                if(blockedEmails.some((e, i) => e === val && i !== idx)) {
+                    alert("이미 존재하는 이메일입니다.");
+                    input.value = blockedEmails[idx];
+                    return;
+                }
+                blockedEmails[idx] = val;
+                saveEmails();
+            });
+            tdEmail.appendChild(input);
+            tr.appendChild(tdEmail);
+
+            tbody.appendChild(tr);
+        });
+    }
+
+    function validateEmail(email) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+
+    document.getElementById("addRowBtn").addEventListener("click", () => {
+        const newEmail = prompt("추가할 이메일을 입력하세요:");
+        if (!newEmail) return;
+        const email = newEmail.trim().toLowerCase();
+        if (!validateEmail(email)) {
+            alert("유효한 이메일을 입력하세요.");
+            return;
+        }
+        if (blockedEmails.includes(email)) {
+            alert("이미 존재하는 이메일입니다.");
+            return;
+        }
+        blockedEmails.push(email);
+        saveEmails().then(renderTable);
+    });
+
+    // 비밀번호 확인
+    function checkPassword() {
+        const input = prompt("비밀번호를 입력하세요:");
+        if (input === PASSWORD) {
+            document.getElementById("content").style.display = "block";
+            loadEmails();
+        } else {
+            alert("비밀번호가 틀렸습니다.");
+            document.body.innerHTML = "<h2 style='text-align:center; color:red;'>접근 권한이 없습니다.</h2>";
+        }
+    }
+
+    checkPassword();
+    
+</script>
+
+</body>
+</html>
