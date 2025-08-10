@@ -80,21 +80,21 @@
 <button id="toggleGrid">그리드 켜기</button>
 <div id="palette"></div>
 <div id="controls">
-        <div><button id="up">↑</button></div>
-        <div>
-            <button id="left">←</button>
-            <button id="place">O</button>
-            <button id="right">→</button>
-        </div>
-        <div><button id="down">↓</button></div>
+    <div><button id="up">↑</button></div>
+    <div>
+        <button id="left">←</button>
+        <button id="place">O</button>
+        <button id="right">→</button>
     </div>
-    <div id="cooldownTimer"></div>
-    <div id="status">캔버스를 수정하시려면 로그인이 필요합니다.</div>
-    <button id="loginBtn">Google 로그인</button>
+    <div><button id="down">↓</button></div>
+</div>
+<div id="cooldownTimer"></div>
+<div id="status">캔버스를 수정하시려면 로그인이 필요합니다.</div>
+<button id="loginBtn">Google 로그인</button>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import {
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import {
         getDatabase, ref, onValue, set, onChildChanged, onChildAdded, get
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
     import {
@@ -205,7 +205,7 @@
             const seconds = Math.ceil((60000 - (now - last)) / 1000);
             startCooldownTimer(currentUser.uid, last);
             if(seconds<60)
-            return alert(`쿨타임: ${seconds}초 후 다시 시도하세요`);
+                return alert(`쿨타임: ${seconds}초 후 다시 시도하세요`);
         }
 
         lastPlacedMap[currentUser.uid] = now;
@@ -319,12 +319,61 @@
 
     if (isMobile) {
         document.getElementById("controls").style.display = "block";
-        document.getElementById("up").onclick = () => moveCursor(0, -1);
-        document.getElementById("down").onclick = () => moveCursor(0, 1);
-        document.getElementById("left").onclick = () => moveCursor(-1, 0);
-        document.getElementById("right").onclick = () => moveCursor(1, 0);
+
+        let shortPressCount = 0;
+        let shortPressTimer;
+
+        function addJoystickEvent(id, dx, dy) {
+            const btn = document.getElementById(id);
+            let pressTimer;
+            let longPressTriggered = false;
+
+            btn.addEventListener("touchstart", () => {
+                longPressTriggered = false;
+                pressTimer = setTimeout(() => {
+                    longPressTriggered = true;
+                    let steps = parseInt(prompt("몇 칸 이동할까요?"), 10);
+                    if (!isNaN(steps) && steps > 0) {
+                        for (let i = 0; i < steps; i++) {
+                            moveCursor(dx, dy);
+                        }
+                    }
+                }, 500); // 0.5초 이상 누르면 꾹 누름 처리
+            });
+
+            btn.addEventListener("touchend", () => {
+                clearTimeout(pressTimer);
+
+                if (!longPressTriggered) {
+                    moveCursor(dx, dy);
+
+                    // ===== 짧게 누른 경우 카운트 =====
+                    shortPressCount++;
+                    clearTimeout(shortPressTimer);
+                    shortPressTimer = setTimeout(() => {
+                        shortPressCount = 0; // 1초 내 연속 입력 없으면 리셋
+                    }, 1000);
+
+                    // 5회 이상 연속으로 누르고 안내문 안 본 경우
+                    if (shortPressCount >= 5 && !localStorage.getItem("longPressTipShown")) {
+                        alert("멀리 이동하시려고 노가다를 하고 계시군요!")
+                        alert("제가 새로운 기능을 알려드릴께요!")
+                        alert("💡 방향 버튼들은 꾹 누르면 한 번에 여러 칸 이동할 수 있습니다!")
+                        alert("그럼 즐거운 창작 활동하세요!")
+                        localStorage.setItem("longPressTipShown", "true");
+                    }
+                }
+            });
+        }
+
+        addJoystickEvent("up", 0, -1);
+        addJoystickEvent("down", 0, 1);
+        addJoystickEvent("left", -1, 0);
+        addJoystickEvent("right", 1, 0);
+
         document.getElementById("place").onclick = () => placePixel();
     }
+
 
     // ====== [전역] 추가 ======
     let magnify = { on: false, x: 0, y: 0 }; // 캔버스 픽셀 좌표(그리드 좌표 아님)
@@ -423,4 +472,3 @@
 </script>
 </body>
 </html>
-
