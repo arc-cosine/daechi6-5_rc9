@@ -555,15 +555,20 @@
         const userInfo = document.getElementById("userInfo");
         const loginBtn = document.getElementById("loginBtn");
         const logoutBtn = document.getElementById("logoutBtn");
-        const adminBtn = document.getElementById("menu-admin");
         if (user) {
             const adminUIDs = ["iLhjGABJYAfdlQfhZeMcaJZm90A3", "brqrYfz4B5hgekWFZAPESnXQHcw1", "KesdyNvO1sUPJfRQxVC7bYINR4u2"];
             const isAdmin = adminUIDs.includes(user.uid);
             const displayName = user.displayName || user.email;
             userInfo.textContent = `${displayName}${isAdmin ? " (관리자)" : ""}`;
-            adminBtn.style.display = "block";
             loginBtn.style.display = "none";
             logoutBtn.style.display = "block";
+        const adminBtn = document.getElementById("menu-admin");
+         if (isAdmin) {
+            adminBtn.style.display = "block";
+        } else {
+            adminBtn.style.display = "none";
+        }
+
         } else {
             userInfo.textContent = "로그인 해주세요.";
             loginBtn.style.display = "block";
@@ -1187,4 +1192,5 @@
 </script>
 </body>
 </html>
+
 
