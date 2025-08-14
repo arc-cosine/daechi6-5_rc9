@@ -1237,9 +1237,10 @@
         if (foundPost) {
             // 기존 카드 UI 대신 바로 상세보기 팝업
             showDetail(foundPost);
+            switchPage("home");
         } else {
             const postList = document.getElementById("postGrid");
-            postList.innerHTML = "<p>해당 게시글을 찾을 수 없습니다.</p>";
+            postList.innerHTML = "<p style='color: white;' >해당 게시글을 찾을 수 없습니다 :(</p>";
         }
     }
 
