@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -666,6 +667,7 @@
 
     // 페이지 전환 및 게시글 불러오기
     async function switchPage(page) {
+        currentPage = page;
         const postList = document.getElementById("postGrid");
         postList.innerHTML = "";
 
@@ -680,9 +682,6 @@
                 }))
             );
 
-            // ✅ 이 부분을 추가하여 데이터가 유효한지 먼저 확인합니다.
-            allPosts = allPosts.filter(post => post && typeof post === 'object');
-
             allPosts = await Promise.all(
                 allPosts.map(async (post) => {
                     const commentSnap = await db.ref(`comments/${post.id}`).once("value");
@@ -693,28 +692,23 @@
                 })
             );
 
-            // 필터링 전에 유효성 검사를 먼저 수행했으므로, 이 필터는 그대로 둡니다.
-            allPosts = allPosts.filter(
-                (post) => post.title?.includes("[공식]") || post.content?.includes("[공식]")
-            );
+            if (page === "official") {
+                allPosts = allPosts.filter(
+                    (post) => post.title?.includes("[공식]") || post.content?.includes("[공식]")
+                );
+            }
 
             allPosts.sort((a, b) => (b.likes || 0) + (b.commentCount || 0) - (a.likes || 0) - (a.commentCount || 0));
             allPosts.forEach(createPostCard);
-        }   if (page === "popular") {
-            // 모든 게시판 글 합쳐서 인기글 기준 정렬
-            const boards = ["home", "new", "official"];
-            let allPosts = [];
+        }
 
-            for (const board of boards) {
-                const snapshot = await db.ref(`posts/${board}`).once("value");
-                const data = snapshot.val() || {};
-                const posts = Object.values(data);
-                allPosts = allPosts.concat(posts);
-            }
+        else if (page === "popular") {
+            const snapshot = await db.ref("posts/home").once("value");
+            const data = snapshot.val() || {};
+            let posts = Object.values(data);
 
-            // 댓글 수 포함
-            allPosts = await Promise.all(
-                allPosts.map(async (post) => {
+            posts = await Promise.all(
+                posts.map(async (post) => {
                     const commentSnap = await db.ref(`comments/${post.id}`).once("value");
                     const commentCount = commentSnap.exists()
                         ? Object.keys(commentSnap.val()).length
@@ -723,14 +717,16 @@
                 })
             );
 
-            // 좋아요 + 댓글 수 합산 내림차순 정렬
-            allPosts.sort(
-                (a, b) => (b.likes || 0) + (b.commentCount || 0) - (a.likes || 0) - (a.commentCount || 0)
-            );
+            posts.sort((a, b) => {
+                const scoreA = (a.likes || 0) + a.commentCount;
+                const scoreB = (b.likes || 0) + b.commentCount;
+                return scoreB - scoreA;
+            });
 
-            allPosts.forEach(createPostCard);
-        } else {
-            // 특정 게시판 글 로딩
+            posts.forEach(createPostCard);
+        }
+
+        else {
             const snapshot = await db.ref(`posts/${page}`).once("value");
             const data = snapshot.val() || {};
             let posts = Object.values(data);
@@ -745,16 +741,12 @@
                 })
             );
 
+            // ✅ 최신순 정렬
             posts.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+
             posts.forEach(createPostCard);
         }
-
-        document.querySelectorAll(".sidebar a").forEach((a) => a.classList.remove("active"));
-        const activeLink = document.getElementById(`menu-${page}`);
-        if (activeLink) activeLink.classList.add("active");
     }
-
-    //
 
 
     // 포스트잇 카드 생성 (작성자 노출 X)
@@ -1071,12 +1063,7 @@
         const input = document.getElementById(`comment-input-${id}`);
         const text = input.value.trim();
         if (!text) return;
-            for (let word of bannedWords) {
-                if (text.includes(word) || text.includes(word)) {
-                    alert(`금지어 "${word}"가 포함되어 있습니다. 게시글을 등록할 수 없습니다.`);
-                    return;
-            }
-        }
+
         const commentData = {
             author: currentUser.displayName || currentUser.email || "익명",
             text,
@@ -1225,6 +1212,7 @@
     });
 
     async function showSinglePost(timestamp) {
+        switchPage("home");
         // posts 아래 모든 카테고리 탐색
         const categoriesSnap = await db.ref("posts").once("value");
         const categories = categoriesSnap.val() || {};
@@ -1251,10 +1239,9 @@
         if (foundPost) {
             // 기존 카드 UI 대신 바로 상세보기 팝업
             showDetail(foundPost);
-            switchPage("home");
         } else {
             const postList = document.getElementById("postGrid");
-            postList.innerHTML = "<p style='color: white;' >해당 게시글을 찾을 수 없습니다 :)</p>";
+            postList.innerHTML = "<p style='color: white;' >해당 게시글을 찾을 수 없습니다 :(</p>";
         }
     }
 
@@ -1285,6 +1272,3 @@
 </script>
 </body>
 </html>
-
-
-
