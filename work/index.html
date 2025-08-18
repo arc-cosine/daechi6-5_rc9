@@ -98,67 +98,6 @@
     </style>
 </head>
 <body>
-<!-- 유튜브 광고 스타일 오버레이 -->
-<div id="adOverlay" style="
-  position: fixed;
-  top: 0; left: 0;
-  width: 100vw; height: 100vh;
-  background: rgba(0,0,0,0.85);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 99999;
-">
-    <div style="position: relative; width: 80%; max-width: 720px; aspect-ratio: 16/9;">
-        <iframe id="adVideo" width="100%" height="100%"
-                src="https://www.youtube.com/embed/o4OsvOqHnZM?autoplay=1&controls=0&rel=0&mute=1&modestbranding=1"
-                title="JPOP 광고"
-                frameborder="0"
-                allow="autoplay; encrypted-media"
-                allowfullscreen>
-        </iframe>
-        <button id="skipBtn" disabled style="
-  position: absolute;
-  bottom: 10px; right: 10px;
-  padding: 10px 15px;
-  background: rgba(100, 100, 100, 0.6);
-  color: white;
-  border: none;
-  font-size: 14px;
-  cursor: not-allowed;
-">영상 건너뛰기</button>
-    </div>
-</div>
-
-<script>
-    window.addEventListener('load', () => {
-        const adOverlay = document.getElementById('adOverlay');
-        const skipBtn = document.getElementById('skipBtn');
-
-        let countdown = 10;
-        skipBtn.innerText = `${countdown}초 후 건너뛰기`;
-
-        const timer = setInterval(() => {
-            countdown--;
-            if (countdown > 0) {
-                skipBtn.innerText = `${countdown}초 후 건너뛰기`;
-            } else {
-                clearInterval(timer);
-                skipBtn.innerText = '광고 건너뛰기';
-                skipBtn.disabled = false;
-                skipBtn.style.cursor = 'pointer';
-                skipBtn.style.background = 'rgba(0,0,0,0.7)';
-            }
-        }, 1000);
-
-        skipBtn.addEventListener('click', () => {
-            if (!skipBtn.disabled) {
-                adOverlay.remove();
-            }
-        });
-    });
-
-</script>
 <div class="header-container">
     <h2>1인 1역 표</h2>
     <div class="button-container">
