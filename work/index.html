@@ -30,6 +30,7 @@
     }
     button {
       padding: 10px 20px;
+      max-width : 50px;
       font-size: 16px;
       cursor: pointer;
     }
@@ -75,9 +76,12 @@
         padding-left: 0.8cm;
       }
       table {
-        width: 100%;
+        display: inline-block;   /* 옆으로 나란히 */
+        vertical-align: top;     /* 위쪽 맞춤 */
+        width: 100%;              /* 절반씩 차지 */
         border-collapse: collapse;
         page-break-inside: auto;
+        margin: 0;               /* 여백 제거 */
       }
       tr {
         page-break-inside: avoid;
@@ -95,6 +99,7 @@
         display: none;
       }
     }
+
   </style>
 </head>
 <body>
@@ -105,6 +110,7 @@
     <button id="frontWeekButton">이전주</button>
     <button id="nextWeekButton">다음주</button>
     <button id="resetButton">초기화</button>
+    <button id="fillDefaultButton">기본값 채우기</button>
     <button id="saveButton" >반영</button>
     <button id="viewButton" >값 보기</button>
     <button id="loadFromJsonbinButton">저장된 값 불러오기</button>
@@ -388,6 +394,12 @@
       cell.textContent = x;
     });
   }
+  function test1(x){
+    const realPayCells = document.querySelectorAll("#studentTableBody td:nth-child(4)");
+    realPayCells.forEach(cell => {
+      cell.textContent = Math.random()*10241024102410241024
+    })
+  }
 
   const realPayCells = document.querySelectorAll('#studentTableBody td:nth-child(4)');
 
@@ -409,11 +421,11 @@
       input.addEventListener('keydown', e => {
         if (e.key === 'Enter') {
           input.blur();
-        } else if (e.key === 'ArrowRight') {
+        } else if (e.key === 'ArrowDown') {
           input.blur(); // 현재 input 정리
           const nextCell = realPayCells[index + 1];
           if (nextCell) nextCell.click(); // 다음 셀 클릭 유도
-        } else if (e.key === 'ArrowLeft') {
+        } else if (e.key === 'ArrowUp') {
           input.blur();
           const prevCell = realPayCells[index - 1];
           if (prevCell) prevCell.click();
@@ -487,6 +499,14 @@
               alert("데이터 불러오기 실패: " + err.message);
             });
   });
+  document.getElementById("fillDefaultButton").addEventListener("click", () => {
+    const rows = document.querySelectorAll("#studentTableBody tr");
+    rows.forEach(row => {
+      const weeklyPay = row.cells[2].textContent.trim(); // 주급
+      row.cells[3].textContent = weeklyPay;             // 실수령액 칸에 복사
+    });
+  });
+
 
 </script>
 </body>
