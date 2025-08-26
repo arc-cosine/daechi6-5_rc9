@@ -371,7 +371,7 @@
     const result = orderedRows.map(row => {
       const cell = row.cells[3];
       const raw = parseFloat(cell.textContent.trim()) || 0;
-      const taxed = Math.round(raw * 0.9 * 100) / 100; // 10% 세금 공제, 소수점 2자리
+      const taxed = Math.round(raw); // 10% 세금 공제, 소수점 2자리
       return taxed.toString();
     });
 
