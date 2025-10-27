@@ -1,31 +1,141 @@
-<html>
+<!DOCTYPE html>
+<html lang="ko">
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>423 Locked</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: white;
+        }
+        center {
+            display: block;
+            text-align: center;
+        }
+        #delay-time {
+            color: red;
+            font-weight: bold;
+        }
+        .ascii-art {
+            font-family: 'Courier New', monospace;
+            white-space: pre;
+            overflow-x: auto;
+            margin: 20px auto;
+            display: inline-block;
+            text-align: left;
+            line-height: 1.1;
+            font-size: 6px;
+        }
+    </style>
 </head>
 <body>
-<center><h1>423 Locked</h1></center>
+<center>
+    <h1>423 Locked</h1>
+</center>
 <hr>
 <center>
-    HTTP/1.1 423 Locked<br />
-    <br/>
-    URI : <span id="uri"></span><br/>
-    STATUS : 423<br />
-    CONTENT : 월급 주세요.<br/>
+    HTTP/1.1 423 Locked<br>
+    <br>
+    URI : <span id="uri"></span>
+    <br>
+    STATUS : 423<br>
+    CONTENT : 월급 주세요. <br />우리반 모두(직업이 있는 자에 한해서만)에게 <br>월급을 지급하시면 잠금을 해제해드리겠습니다.<br><br><strong id="delay-time"></strong><br>
 </center>
-<hr><center>Koyeb®</center>
+<hr>
+<center>
+    <div class="ascii-art">        @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@&&#BGP5YYJ??77!!!!!!!!!!!!77?JJY5PGB##&@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@#BPY?7~^:.               ..                  .:^~7JPG#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@&GY7^.       .::^~!7??JJJYYY55555YYYYYYYJJ??77!~^:..      .^?5PB&@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@#5?^.    .:^~!?JY55PPGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGP55Y?7!^:.     .^!7?JPB@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@B5!^    .:~!?Y5PGGGGGGGGGGGGGGGGPPPPP5555555PPPPGGGGGGGGGGGGGGGGPPYJ?7!^.       ^?5B&@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@&P?^    .^!?Y5PGGGGGGGGGPP5YJJ?7!~~^^^:::.......::^^^~~!7?JJY5PPGGGGGGGGGGGP5J!^.       :!YB@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@#5!:   .^!?5PGGGGGGGPP5J?7~^:..                                ..:^~7?Y5PGGGGGGGGGGPY7~:       ^JB&@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@&P?^.   :~?YPGGGGGGPPY?!~:.                                                .:^!?YPGGGGGGGGGPY7^.      :?B@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@B?:    ^!?YPGGGGGP5J7~:.                                                          .:~7J5PGGGGGGGPY7^.     .?&@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@&?    .!JPGGGGGGPY7^.                                                                    .^7J5GGGGGGGPY!:     ^B@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@P:   :75GGGGGGPY!^.                                                                           .^?5GGGGGGG57:    .G@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@#7   .!5GGGGGG57:.                                                                                 .^?PGGGGGGP?:   .5@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        @@@@@@@@@@@@@@@@@@@@@@@@@@@@&?.  .~JPGGGGPJ~.                                                                                       :!5GGGGGG5!.   !#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        @@@@@@@@@@@@@@@@@@@@@@@@@@@P:   ^?PGGGGPJ^                                                                                            .!YPGPPPPY~   .Y@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        @@@@@@@@@@@@@@@@@@@@@@@@@5^   :?5GGGGPY~.                                                                                               .!YGGPPGP?:   !&@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        @@@@@@@@@@@@@@@@@@@@@@@@Y   :!YGGGGG5~.                                                                                                   :7PGGGGPY~   :G@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        @@@@@@@@@@@@@@@@@@@@@@@Y   ^YPGGGGGJ:                                                                                                       ^YGGGGGP7.   J@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        @@@@@@@@@@@@@@@@@@@@@@5   ^YPGGGGP7.                                                                                                         .7PGGGPPJ:   ?@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        @@@@@@@@@@@@@@@@@@@@@J   :JPGGGG5~                                                                                                             ~5GPPPGY^   ?@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        @@@@@@@@@@@@@@@@@@@@7   ^JPGGGGY:                                                                                                               ^YGPPPG5^   P@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        @@@@@@@@@@@@@@@@@@&!   ^YGGGGGJ.                                                                                                                 :YGPPPPY:  .B@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        @@@@@@@@@@@@@@@@@@~   ~5GGGGG?.                                                                                                                   :YGPPPP?:  ^&@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        @@@@@@@@@@@@@@@@@?   ^5GGGGGJ.                      .                                                                      .^:.                    :YPPPP5?:  !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        @@@@@@@@@@@@@@@@5   :YGGGGGJ.                   :!J55:                                                                     ~GPP5?^                  ^YPPPP57.  Y@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        @@@@@@@@@@@@@@@B.  .JGGGGGY.                  ^JGGBG?.                                                                      !PGGGGY^                 ~PGPPP5~  .G@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        @@@@@@@@@@@@@@&^  .7PGGGG5:                 :JGGGGY^                                                                         :?5GGGGJ.                !PPPPPY^  :#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        @@@@@@@@@@@@@@?   ~PGGGGP~                 ~GBGGP!                                                                             .!YPGBY.               .?PPPPP?:  7@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        @@@@@@@@@@@@@P   :YGGGGG7                  YGP57.                                                                                 ^7JJ:                :JPPPP57.  P@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        @@@@@@@@@@@@&:  .?GGGGGY.                   ::.                                                                                                         ^5GPPPY~  :&@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        @@@@@@@@@@@@7   !PGGGGP^                                .....                                                      .^^~^:                                7PGPPPJ:  7@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        @@@@@@@@@@@Y   :YGGGGG7                               :?5PPPP5J~           ^?J7:                  .?YJ7:         :JPGGGGPY!.                             .JGGPPP7.  Y@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        @@@@@@@@@@#:  .?GGGGGY.                              :PGGGGGGGGB!        .?GGGB?                   JBGGP?       :PBGGGGGGGBY.                             ^5GGPP5~  :#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        @@@@@@@@@@Y   ~PGGGGP~                               ?BGGGGGGGGBJ        YGGGG?.       .^:          JGGGB?      ~BGGGGGGGGGG:                              7GGGGPJ:  ?@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        @@@@@@@@@@7  .JGGGGGJ                                ~GGGGGGGGGB7       !GPPG7        :PGGY.        .5GGGP.     :GBGGGGGGGBJ                               :YGGGGP!. .B@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        @@@@@@@@@&^  ^YGGGGP^                                 ^J5GGGGPY!.       5GGGY         !GGGG^         5GGGP.      ^J5PGGGG57.                                !PGGGGY^  ^&@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        @@@@@@@@@G  .!5GGGGG~                                   .^~~^.          YGGGJ        .5GGGGY        :GGGG5.        .:^^^:.                                  7PGGGGPJ:  7@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        @@@@@@@@@!  :JPGGGGG5:                                                  ~GGGP!.    .~5GGGGGGY~:.   :5GGGB?                                                 ~PGGGGGGP!.  !&@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        @@@@@@@@!  .!5GGGPGGGY.                                                  !GGGG5J?JY5GGGGJJPGGGP5YY5GGGGGJ.                                                :5GGGPPGGGP?.  ^B@@@@@@@@@&&&&@@@@@@@@@@@@@@@@
+        @@@@@@@7  .75GGGP5PGGG?                                                   :?5GGGBBBGGPJ^  :7YPGGBBBGGPY~                                                  JGGGP5PPGGGG?:  .G@@@#PJ!^:..:^!?P&@@@@@@@@@@@
+        @@@@@@7  .75GGGP555PGGG!                                                    .^~!777!~:       :~!777!~:                                                   !GGGPPPPPPGGGGJ:  .GP~    .:^^:.   :J&@@@@@@@@@
+        @@@@@?  .75GGGP55555PGGP:                                                                                                                               .PGGGPPPPPPPGGGGJ:      :!J5PPP5Y?~.  .~Y&@@@@@@
+        @@@@Y  .!5GGGPP55555PGGGJ                                                                                                                               ?BGGPPPPPPPPPGGGG?.  .^?PGGGGGGGGGPJ~:.  !@@@@@@
+        @@@P  .~5GGGPPPPPP555PGGG~                                                                                                                             ^GGGPPPPPPPY7~?GGGP7^7YPGGGGGGGGGGGGGPP7   J@@@@@
+        @@&^  ^YGGG?7Y5PPPPP5PPGGY                                                                                                                             ?BGGPPP5J!^.  .YGGGGGGGGGGGGBBBBGGGGGGGY^   7@@@@
+        @@J  .?PGGY. .:!?Y55PPPGGG^                                                                                                                           :GGG5?!^:.      ^PGGGGGGGGGBBBBBBBBGGGGGG5~   ?@@@
+        @#.  ~5GGP~      .:~7JYGGGY                                                                                                                           7GGG^            JGGGGGGBBB###BBBBBBGGGGGGP!   7@@
+        @P  .7PGGY.           .?GGG:                                                                                                                          YGB5.            ^GGGGBB#######BBBB##BGGGGGP~   J@
+        @Y  .?PGG7             :GGB!                                                                                                                         :PGB7             :GGGBB#######BBB##B57JGGGGG5^  .#
+        @7  :YPGGY~.            PGBY                                                                                                                         ~GGB~          .~JGBGGBB##########GJ^. :5GGGGG7.  Y
+        @^  ^YGGGBBP?^.         JBG5                                                                                                                         7BGG^       .~JG#&#BGGBB#######B5!.     JGGGGGJ.  J
+        &:  ~5GGGB###BGY7^.     7BGP.                                                                                                                        ?BGG:   .~?5B&&####BGGB##B##BP7^       :YGGGGG?.  Y
+        @~  ^YGGGB#######BG5?~: !BGP.                                                                                                                        ?BGG!!JPB#&&#######GGGB###GJ^.      .~?PGGGGG5~  :#
+        @7  :JPGGB############BGPGGP.                                                                                                                        7BGG##############BGGGBGY~.      .^?5GGGGGGPJ^   5@
+        @5  .7PGGB##############BGGP                                                                                                                         ~GGGB############BBGGP!.      .^75GGGGGGP57^   ^P@@
+        @&^  ^YPGGB#############GGGY                                                                                                                         .PGGB##########BBBGGGJ     :~?5GGGGGGP5?~.  .!P@@@@
+        @@P  .!5GGB############BGGB?                                                                                                                          JBGGB###########BGGP^ .^7YPGGGGGGP5?~:   ~5&@@@@@@</div>
+</center>
+<hr>
+<center>nginx</center>
 
 <script>
     let path = window.location.pathname + window.location.search + window.location.hash;
     path = path.replace(/\.html$/, '');
     document.getElementById('uri').textContent = '.' + path;
-</script>
 
+    // 급여일 설정 (2025년 10월 10일 0시 0분 0초 0ms)
+    const salaryDate = new Date(2025, 9, 10, 0, 0, 0, 0); // 월은 0부터 시작 (9 = 10월)
+
+    function updateDelayTime() {
+        const now = new Date();
+        const diff = now - salaryDate;
+
+        if (diff < 0) {
+            document.getElementById('delay-time').textContent = '아직 급여일이 아닙니다.';
+            return;
+        }
+
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+        const milliseconds = diff % 1000;
+
+        document.getElementById('delay-time').textContent =
+            `${days}일 ${hours}시간 ${minutes}분 ${seconds}초 ${milliseconds}밀리초 연체되었습니다.`;
+    }
+
+    // 초기 실행 및 10ms마다 업데이트
+    updateDelayTime();
+    setInterval(updateDelayTime, 10);
+</script>
 </body>
 </html>
-<!-- a padding to disable MSIE and Chrome friendly error page -->
-<!-- a padding to disable MSIE and Chrome friendly error page -->
-<!-- a padding to disable MSIE and Chrome friendly error page -->
-<!-- a padding to disable MSIE and Chrome friendly error page -->
-<!-- a padding to disable MSIE and Chrome friendly error page -->
-<!-- a padding to disable MSIE and Chrome friendly error page -->
