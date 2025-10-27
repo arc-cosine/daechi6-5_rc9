@@ -1,141 +1,346 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>423 Locked</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>신청곡 신청기</title>
+
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
     <style>
+        /* small custom tweaks */
+        html, body, #app {
+            height: 100%;
+        }
         body {
-            margin: 0;
-            padding: 20px;
-            background: white;
+            background: linear-gradient(180deg, #0f0520 0%, #140725 60%);
         }
-        center {
-            display: block;
-            text-align: center;
-        }
-        #delay-time {
-            color: red;
-            font-weight: bold;
-        }
-        .ascii-art {
-            font-family: 'Courier New', monospace;
-            white-space: pre;
-            overflow-x: auto;
-            margin: 20px auto;
-            display: inline-block;
-            text-align: left;
-            line-height: 1.1;
-            font-size: 6px;
+        .glass {
+            backdrop-filter: blur(6px) saturate(120%);
+            -webkit-backdrop-filter: blur(6px) saturate(120%);
         }
     </style>
 </head>
-<body>
-<center>
-    <h1>423 Locked</h1>
-</center>
-<hr>
-<center>
-    HTTP/1.1 423 Locked<br>
-    <br>
-    URI : <span id="uri"></span>
-    <br>
-    STATUS : 423<br>
-    CONTENT : 월급 주세요. <br />우리반 모두(직업이 있는 자에 한해서만)에게 <br>월급을 지급하시면 잠금을 해제해드리겠습니다.<br><br><strong id="delay-time"></strong><br>
-</center>
-<hr>
-<center>
-    <div class="ascii-art">        @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@&&#BGP5YYJ??77!!!!!!!!!!!!77?JJY5PGB##&@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@#BPY?7~^:.               ..                  .:^~7JPG#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@&GY7^.       .::^~!7??JJJYYY55555YYYYYYYJJ??77!~^:..      .^?5PB&@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@#5?^.    .:^~!?JY55PPGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGP55Y?7!^:.     .^!7?JPB@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@B5!^    .:~!?Y5PGGGGGGGGGGGGGGGGPPPPP5555555PPPPGGGGGGGGGGGGGGGGPPYJ?7!^.       ^?5B&@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@&P?^    .^!?Y5PGGGGGGGGGPP5YJJ?7!~~^^^:::.......::^^^~~!7?JJY5PPGGGGGGGGGGGP5J!^.       :!YB@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@#5!:   .^!?5PGGGGGGGPP5J?7~^:..                                ..:^~7?Y5PGGGGGGGGGGPY7~:       ^JB&@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@&P?^.   :~?YPGGGGGGPPY?!~:.                                                .:^!?YPGGGGGGGGGPY7^.      :?B@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@B?:    ^!?YPGGGGGP5J7~:.                                                          .:~7J5PGGGGGGGPY7^.     .?&@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@&?    .!JPGGGGGGPY7^.                                                                    .^7J5GGGGGGGPY!:     ^B@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@P:   :75GGGGGGPY!^.                                                                           .^?5GGGGGGG57:    .G@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@#7   .!5GGGGGG57:.                                                                                 .^?PGGGGGGP?:   .5@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@@@@@@@@@@@@@@@@@&?.  .~JPGGGGPJ~.                                                                                       :!5GGGGGG5!.   !#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@@@@@@@@@@@@@@@@P:   ^?PGGGGPJ^                                                                                            .!YPGPPPPY~   .Y@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@@@@@@@@@@@@@@5^   :?5GGGGPY~.                                                                                               .!YGGPPGP?:   !&@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@@@@@@@@@@@@@Y   :!YGGGGG5~.                                                                                                   :7PGGGGPY~   :G@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@@@@@@@@@@@@Y   ^YPGGGGGJ:                                                                                                       ^YGGGGGP7.   J@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@@@@@@@@@@@5   ^YPGGGGP7.                                                                                                         .7PGGGPPJ:   ?@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@@@@@@@@@@J   :JPGGGG5~                                                                                                             ~5GPPPGY^   ?@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@@@@@@@@@7   ^JPGGGGY:                                                                                                               ^YGPPPG5^   P@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@@@@@@@&!   ^YGGGGGJ.                                                                                                                 :YGPPPPY:  .B@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@@@@@@@~   ~5GGGGG?.                                                                                                                   :YGPPPP?:  ^&@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@@@@@@?   ^5GGGGGJ.                      .                                                                      .^:.                    :YPPPP5?:  !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@@@@@5   :YGGGGGJ.                   :!J55:                                                                     ~GPP5?^                  ^YPPPP57.  Y@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@@@@B.  .JGGGGGY.                  ^JGGBG?.                                                                      !PGGGGY^                 ~PGPPP5~  .G@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@@@&^  .7PGGGG5:                 :JGGGGY^                                                                         :?5GGGGJ.                !PPPPPY^  :#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@@@?   ~PGGGGP~                 ~GBGGP!                                                                             .!YPGBY.               .?PPPPP?:  7@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@@P   :YGGGGG7                  YGP57.                                                                                 ^7JJ:                :JPPPP57.  P@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@&:  .?GGGGGY.                   ::.                                                                                                         ^5GPPPY~  :&@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@7   !PGGGGP^                                .....                                                      .^^~^:                                7PGPPPJ:  7@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@Y   :YGGGGG7                               :?5PPPP5J~           ^?J7:                  .?YJ7:         :JPGGGGPY!.                             .JGGPPP7.  Y@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@#:  .?GGGGGY.                              :PGGGGGGGGB!        .?GGGB?                   JBGGP?       :PBGGGGGGGBY.                             ^5GGPP5~  :#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@Y   ~PGGGGP~                               ?BGGGGGGGGBJ        YGGGG?.       .^:          JGGGB?      ~BGGGGGGGGGG:                              7GGGGPJ:  ?@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@7  .JGGGGGJ                                ~GGGGGGGGGB7       !GPPG7        :PGGY.        .5GGGP.     :GBGGGGGGGBJ                               :YGGGGP!. .B@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@&^  ^YGGGGP^                                 ^J5GGGGPY!.       5GGGY         !GGGG^         5GGGP.      ^J5PGGGG57.                                !PGGGGY^  ^&@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@G  .!5GGGGG~                                   .^~~^.          YGGGJ        .5GGGGY        :GGGG5.        .:^^^:.                                  7PGGGGPJ:  7@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@!  :JPGGGGG5:                                                  ~GGGP!.    .~5GGGGGGY~:.   :5GGGB?                                                 ~PGGGGGGP!.  !&@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@!  .!5GGGPGGGY.                                                  !GGGG5J?JY5GGGGJJPGGGP5YY5GGGGGJ.                                                :5GGGPPGGGP?.  ^B@@@@@@@@@&&&&@@@@@@@@@@@@@@@@
-        @@@@@@@7  .75GGGP5PGGG?                                                   :?5GGGBBBGGPJ^  :7YPGGBBBGGPY~                                                  JGGGP5PPGGGG?:  .G@@@#PJ!^:..:^!?P&@@@@@@@@@@@
-        @@@@@@7  .75GGGP555PGGG!                                                    .^~!777!~:       :~!777!~:                                                   !GGGPPPPPPGGGGJ:  .GP~    .:^^:.   :J&@@@@@@@@@
-        @@@@@?  .75GGGP55555PGGP:                                                                                                                               .PGGGPPPPPPPGGGGJ:      :!J5PPP5Y?~.  .~Y&@@@@@@
-        @@@@Y  .!5GGGPP55555PGGGJ                                                                                                                               ?BGGPPPPPPPPPGGGG?.  .^?PGGGGGGGGGPJ~:.  !@@@@@@
-        @@@P  .~5GGGPPPPPP555PGGG~                                                                                                                             ^GGGPPPPPPPY7~?GGGP7^7YPGGGGGGGGGGGGGPP7   J@@@@@
-        @@&^  ^YGGG?7Y5PPPPP5PPGGY                                                                                                                             ?BGGPPP5J!^.  .YGGGGGGGGGGGGBBBBGGGGGGGY^   7@@@@
-        @@J  .?PGGY. .:!?Y55PPPGGG^                                                                                                                           :GGG5?!^:.      ^PGGGGGGGGGBBBBBBBBGGGGGG5~   ?@@@
-        @#.  ~5GGP~      .:~7JYGGGY                                                                                                                           7GGG^            JGGGGGGBBB###BBBBBBGGGGGGP!   7@@
-        @P  .7PGGY.           .?GGG:                                                                                                                          YGB5.            ^GGGGBB#######BBBB##BGGGGGP~   J@
-        @Y  .?PGG7             :GGB!                                                                                                                         :PGB7             :GGGBB#######BBB##B57JGGGGG5^  .#
-        @7  :YPGGY~.            PGBY                                                                                                                         ~GGB~          .~JGBGGBB##########GJ^. :5GGGGG7.  Y
-        @^  ^YGGGBBP?^.         JBG5                                                                                                                         7BGG^       .~JG#&#BGGBB#######B5!.     JGGGGGJ.  J
-        &:  ~5GGGB###BGY7^.     7BGP.                                                                                                                        ?BGG:   .~?5B&&####BGGB##B##BP7^       :YGGGGG?.  Y
-        @~  ^YGGGB#######BG5?~: !BGP.                                                                                                                        ?BGG!!JPB#&&#######GGGB###GJ^.      .~?PGGGGG5~  :#
-        @7  :JPGGB############BGPGGP.                                                                                                                        7BGG##############BGGGBGY~.      .^?5GGGGGGPJ^   5@
-        @5  .7PGGB##############BGGP                                                                                                                         ~GGGB############BBGGP!.      .^75GGGGGGP57^   ^P@@
-        @&^  ^YPGGB#############GGGY                                                                                                                         .PGGB##########BBBGGGJ     :~?5GGGGGGP5?~.  .!P@@@@
-        @@P  .!5GGB############BGGB?                                                                                                                          JBGGB###########BGGP^ .^7YPGGGGGGP5?~:   ~5&@@@@@@</div>
-</center>
-<hr>
-<center>nginx</center>
+<body class="text-slate-100 antialiased">
+<div id="app" class="min-h-screen flex items-center justify-center p-6">
+    <div class="w-full max-w-3xl mx-auto">
+
+        <!-- 헤더 -->
+        <header class="mb-6 flex items-center justify-between">
+            <h1 class="text-3xl font-extrabold tracking-tight bg-clip-text text-transparent"
+                style="color : white;">
+                신청곡 신청기
+            </h1>
+            <div class="flex gap-2 items-center">
+                <button id="teacherBtn"
+                        class="px-3 py-1 rounded-full text-sm font-medium glass hover:scale-105 transition-transform">
+                    교사용 보기
+                </button>
+                <button id="clearLocal" title="로컬 캐시 초기화"
+                        class="px-3 py-1 rounded-full text-sm font-medium bg-slate-700/40 hover:bg-slate-700/60">
+                    초기화
+                </button>
+            </div>
+        </header>
+
+        <!-- 메인 카드 -->
+        <main class="glass bg-gradient-to-br from-white/3 to-white/5 rounded-2xl p-6 shadow-2xl border border-white/5">
+            <div class="grid md:grid-cols-2 gap-6 items-start">
+
+                <!-- 학생 신청 -->
+                <section>
+                    <h2 class="text-xl font-semibold mb-3">학생 — 신청하기</h2>
+                    <form id="requestForm" class="space-y-4">
+                        <div>
+                            <label class="block text-sm mb-1">노래 제목</label>
+                            <input id="title" required
+                                   class="w-full rounded-lg p-3 bg-white/5 placeholder:text-slate-300 outline-none border border-white/6"
+                                   placeholder="예: Butter" />
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-1">YouTube 링크</label>
+                            <input id="url" required class="w-full rounded-lg p-3 bg-white/5 placeholder:text-slate-300 outline-none border border-white/6" placeholder="https://www.youtube.com/watch?v=xxxxxxxxxxx" />
+                        </div>
+                        <div class="flex gap-2">
+                            <input id="nickname"
+                                   placeholder="닉네임 (예: 아코)"
+                                   class="flex-1 rounded-lg p-3 bg-white/5 outline-none border border-white/6" />
+                            <button type="submit"
+                                    class="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-violet-700 font-semibold shadow-lg">
+                                신청
+                            </button>
+                        </div>
+                        <p class="text-xs text-slate-300">
+                            입력하면 목록이 실시간으로 교사 화면에 표시됩니다.
+                        </p>
+                    </form>
+                    <div id="studentNotice" class="mt-4 text-sm text-slate-300/80"></div>
+                </section>
+
+                <!-- 실시간 신청 목록 -->
+                <section>
+                    <div class="flex items-center justify-between">
+                        <h2 id="listTitle" class="text-xl font-semibold">실시간 신청 목록</h2>
+                        <div class="text-sm text-slate-300">
+                            요청 수: <span id="count">0</span>
+                        </div>
+                    </div>
+                    <ul id="requests" class="mt-4 space-y-3 max-h-96 overflow-auto pr-2"></ul>
+
+                    <div id="teacherControls" class="mt-4 hidden">
+                        <h3 class="text-sm font-medium mb-2">교사 도구</h3>
+                        <div class="flex gap-2">
+                            <button id="pinFirst" class="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-violet-700 font-semibold shadow-lg">순서 변경</button>
+                            <button id="removeAll" class="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-violet-700 font-semibold shadow-lg">모두 삭제</button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <footer class="mt-6 text-sm text-center text-slate-400">
+            Made by 한아린 with ❤️
+        </footer>
+    </div>
+</div>
+<!-- YouTube Modal -->
+<div id="videoModal" class="hidden fixed inset-0 bg-black/90 flex items-center justify-center z-50">
+    <div class="relative w-full h-full flex items-center justify-center">
+        <iframe id="videoFrame" class="w-[90%] h-[80%] rounded-xl shadow-xl" src="" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+        <button id="closeModal" class="absolute top-5 right-5 px-4 py-2 bg-rose-600 rounded-lg">닫기 ✕</button>
+    </div>
+</div>
+
+<!-- Scaledrone client -->
+<script src="https://cdn.scaledrone.com/scaledrone.min.js"></script>
 
 <script>
-    let path = window.location.pathname + window.location.search + window.location.hash;
-    path = path.replace(/\.html$/, '');
-    document.getElementById('uri').textContent = '.' + path;
+    /*****************************************************************
+     * 설정: 아래 CHANNEL_ID를 Scaledrone 대시보드에서 발급받은 값으로
+     * 바꿔주세요. roomName은 같은 값을 쓰면 동일한 채팅방으로 연결됩니다.
+     *****************************************************************/
+    const CHANNEL_ID = 'SnuhZa1gvqPm0btj'; // <<-- 여기를 바꾸세요
+    const ROOM_NAME = 'song-requests';
+    const TEACHER_PASSWORD = 'teacher123'; // 데모용. 필요하면 변경하세요.
 
-    // 급여일 설정 (2025년 10월 10일 0시 0분 0초 0ms)
-    const salaryDate = new Date(2025, 9, 10, 0, 0, 0, 0); // 월은 0부터 시작 (9 = 10월)
+    // UI elements
+    const form = document.getElementById('requestForm');
+    const titleInput = document.getElementById('title');
+    const urlInput = document.getElementById('url');
+    const nickInput = document.getElementById('nickname');
+    const requestsList = document.getElementById('requests');
+    const countEl = document.getElementById('count');
+    const teacherBtn = document.getElementById('teacherBtn');
+    const teacherControls = document.getElementById('teacherControls');
+    const listTitle = document.getElementById('listTitle');
+    const studentNotice = document.getElementById('studentNotice');
+    const clearLocal = document.getElementById('clearLocal');
 
-    function updateDelayTime() {
-        const now = new Date();
-        const diff = now - salaryDate;
+    let isTeacher = false;
+    let items = JSON.parse(localStorage.getItem('songRequests') || '[]');
 
-        if (diff < 0) {
-            document.getElementById('delay-time').textContent = '아직 급여일이 아닙니다.';
-            return;
-        }
-
-        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-        const milliseconds = diff % 1000;
-
-        document.getElementById('delay-time').textContent =
-            `${days}일 ${hours}시간 ${minutes}분 ${seconds}초 ${milliseconds}밀리초 연체되었습니다.`;
+    // helper: YouTube ID 추출
+    function extractYouTubeID(url) {
+        if (!url) return null;
+        try {
+            const u = new URL(url);
+            if (u.hostname.includes('youtube.com')) return new URLSearchParams(u.search).get('v');
+            if (u.hostname.includes('youtu.be')) return u.pathname.slice(1);
+        } catch (e) { }
+        const m = url.match(/(?:v=|youtu\.be\/)([A-Za-z0-9_-]{6,})/);
+        return m ? m[1] : null;
     }
 
-    // 초기 실행 및 10ms마다 업데이트
-    updateDelayTime();
-    setInterval(updateDelayTime, 10);
+    function render() {
+        requestsList.innerHTML = '';
+        items.slice().reverse().forEach(req => {
+            const id = req.id;
+            const vId = extractYouTubeID(req.url);
+
+            const li = document.createElement('li');
+            li.className = 'bg-white/3 rounded-xl p-3 flex gap-3 items-start border border-white/4';
+            li.innerHTML = `
+          <div class="w-16 h-12 rounded-md overflow-hidden flex-shrink-0 bg-slate-800/30">
+            ${vId
+                ? `<img src="https://img.youtube.com/vi/${vId}/mqdefault.jpg" alt="thumb" class="w-full h-full object-cover"/>`
+                : `<div class="w-full h-full flex items-center justify-center text-xs text-slate-400">No</div>`}
+          </div>
+          <div class="flex-1">
+            <div class="flex items-baseline justify-between gap-3">
+              <div>
+                <div class="font-semibold">${escapeHtml(req.title)}</div>
+                <div class="text-xs text-slate-300">${escapeHtml(req.nick || '익명')} • ${new Date(req.ts).toLocaleString()}</div>
+              </div>
+              <div class="flex gap-2 items-center">
+                ${isTeacher ? `<button data-id="${id}"  class="deleteBtn px-3 px-1 rounded-lg bg-gradient-to-r from-purple-500 to-violet-700 font-semibold shadow-lg">🗑️</button>` : ''}
+                ${req.url ? `<button data-url="${escapeAttr(req.url)}" class="ytBtn text-xs px-2 py-1 rounded bg-white/6">YouTube</button>` : ''}
+
+              </div>
+            </div>
+            ${req.note ? `<div class="mt-2 text-sm text-slate-300">${escapeHtml(req.note)}</div>` : ''}
+          </div>
+        `;
+            requestsList.appendChild(li);
+        });
+        countEl.textContent = items.length;
+
+        // 삭제 버튼 핸들러
+        document.querySelectorAll('.deleteBtn').forEach(btn => {
+            btn.onclick = () => {
+                const id = btn.dataset.id;
+                items = items.filter(it => it.id !== id);
+                saveAndRender();
+                publish({ type: 'delete', id });
+            };
+        });
+        // attach YouTube open handlers
+        document.querySelectorAll('.ytBtn').forEach(btn => {
+            btn.onclick = () => {
+                const url = btn.dataset.url;
+                const vId = extractYouTubeID(url);
+                if (vId) {
+                    videoFrame.src = `https://www.youtube.com/embed/${vId}?autoplay=1`;
+                    videoModal.classList.remove('hidden');
+                }
+            };
+        });
+
+// modal close
+        document.getElementById('closeModal').onclick = () => {
+            videoFrame.src = "";
+            videoModal.classList.add('hidden');
+        };
+    }
+
+    function escapeHtml(s) {
+        if (!s) return '';
+        return s.replace(/[&<>\"']/g, c => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        })[c]);
+    }
+
+    function escapeAttr(s) {
+        return (s || '').replace(/\"/g, '&quot;');
+    }
+
+    function saveAndRender() {
+        localStorage.setItem('songRequests', JSON.stringify(items));
+        render();
+    }
+
+    // --- Scaledrone ---
+    let drone = null;
+    let room = null;
+
+    function setupScaledrone() {
+        if (!CHANNEL_ID || CHANNEL_ID.includes('REPLACE')) {
+            studentNotice.textContent = '⚠️ Scaledrone 채널 ID를 설정하세요.';
+            return;
+        }
+        drone = new Scaledrone(CHANNEL_ID);
+
+        drone.on('open', error => {
+            if (error) {
+                console.error('Scaledrone open error', error);
+                studentNotice.textContent = 'Scaledrone 연결 실패: ' + error;
+                return;
+            }
+            studentNotice.textContent = '연결 성공';
+        });
+
+        room = drone.subscribe(ROOM_NAME);
+        room.on('open', () => console.log('room opened'));
+        room.on('data', (data) => {
+            if (!data) return;
+            if (data.type === 'add' && data.payload) {
+                if (items.some(it => it.id === data.payload.id)) return;
+                items.push(data.payload);
+                saveAndRender();
+            } else if (data.type === 'delete' && data.id) {
+                items = items.filter(it => it.id !== data.id);
+                saveAndRender();
+            } else if (data.type === 'clear') {
+                items = [];
+                saveAndRender();
+            } else if (data.type === 'reorder' && Array.isArray(data.payload)) {
+                items = data.payload;
+                saveAndRender();
+            }
+        });
+    }
+
+    function publish(obj) {
+        if (!drone) return;
+        try {
+            drone.publish({ room: ROOM_NAME, message: obj });
+        } catch (e) {
+            console.warn('publish err', e);
+        }
+    }
+
+    // --- 이벤트 핸들러 ---
+    form.addEventListener('submit', e => {
+        e.preventDefault();
+        const title = titleInput.value.trim();
+        const url = urlInput.value.trim();
+        const nick = nickInput.value.trim();
+        if (!title) return alert('제목을 입력하세요');
+
+        const item = {
+            id: String(Date.now()) + '-' + Math.random().toString(36).slice(2, 8),
+            title, url, nick, ts: Date.now()
+        };
+
+        items.push(item);
+        saveAndRender();
+        publish({ type: 'add', payload: item });
+
+        titleInput.value = '';
+        urlInput.value = '';
+        studentNotice.textContent = '제출 완료!';
+        setTimeout(() => studentNotice.textContent = '', 2500);
+    });
+
+    teacherBtn.addEventListener('click', () => {
+        const pw = prompt('교사용 비밀번호를 입력하세요');
+        if (pw === TEACHER_PASSWORD) {
+            isTeacher = true;
+            teacherControls.classList.remove('hidden');
+            listTitle.textContent = '교사용 신청 목록';
+            teacherBtn.textContent = '교사용 모드 (활성)';
+            teacherBtn.classList.add('bg-white/6');
+            render();
+        } else if (pw !== null) {
+            alert('비밀번호가 틀렸습니다.');
+        }
+    });
+
+    document.getElementById('removeAll').addEventListener('click', () => {
+        if (!confirm('모두 삭제하시겠습니까?')) return;
+        items = [];
+        saveAndRender();
+        publish({ type: 'clear' });
+    });
+
+    document.getElementById('pinFirst').addEventListener('click', () => {
+        if (items.length <= 1) return alert('고정할 항목이 없습니다.');
+        const it = items.shift();
+        items.push(it);
+        saveAndRender();
+        publish({ type: 'reorder', payload: items });
+    });
+
+    clearLocal.addEventListener('click', () => {
+        if (!confirm('로컬 저장된 요청을 초기화할까요?')) return;
+        localStorage.removeItem('songRequests');
+        items = [];
+        render();
+    });
+
+    // 초기 실행
+    saveAndRender();
+    try { setupScaledrone(); } catch (e) { console.warn(e); }
 </script>
 </body>
 </html>
