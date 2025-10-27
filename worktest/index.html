@@ -1,141 +1,321 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>423 Locked</title>
+    <meta charset="UTF-8" />
+    <title>자리 경매 시스템</title>
     <style>
         body {
-            margin: 0;
+            font-family: sans-serif;
             padding: 20px;
-            background: white;
+            background: #f6faff;
         }
-        center {
-            display: block;
+
+        .seat-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 100px);
+            grid-gap: 10px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .seat {
+            background: #d5f0ff;
+            border: 1px solid #bbb;
+            border-radius: 4px;
+            padding: 5px;
             text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 60px;
+            transition: background 0.3s;
         }
-        #delay-time {
-            color: red;
-            font-weight: bold;
+
+        .seat input {
+            border: none;
+            background: transparent;
+            text-align: center;
+            font-size: 12px;
+            padding: 2px;
+            margin: 1px 0;
         }
-        .ascii-art {
-            font-family: 'Courier New', monospace;
+
+        .seat input:focus {
+            outline: none;
+            background: #fff8cc;
+        }
+
+        .seat.flagged {
+            background: #ffcccc;
+        }
+
+        .last-seat-1 {
+            position: absolute;
+            width: 100px;
+            top: 0px;
+            left: 700px;
+        }
+
+        .last-seat-2 {
+            position: absolute;
+            width: 100px;
+            top: 70px;
+            left: 700px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: #5fcf80;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        #output {
             white-space: pre;
-            overflow-x: auto;
-            margin: 20px auto;
-            display: inline-block;
-            text-align: left;
-            line-height: 1.1;
-            font-size: 6px;
+            margin-top: 20px;
+            background: #eee;
+            padding: 10px;
+            font-family: monospace;
+            width: 90%;
+            height: 200px;
+        }
+
+        @media print {
+            body {
+                margin: 0;
+                padding: 0;
+            }
+            h2, #output, #printBtn, #saveBtn {
+                display: none;
+            }
+            .seat-grid {
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body>
-<center>
-    <h1>423 Locked</h1>
-</center>
-<hr>
-<center>
-    HTTP/1.1 423 Locked<br>
-    <br>
-    URI : <span id="uri"></span>
-    <br>
-    STATUS : 423<br>
-    CONTENT : 월급 주세요. <br />우리반 모두(직업이 있는 자에 한해서만)에게 <br>월급을 지급하시면 잠금을 해제해드리겠습니다.<br><br><strong id="delay-time"></strong><br>
-</center>
-<hr>
-<center>
-    <div class="ascii-art">        @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@&&#BGP5YYJ??77!!!!!!!!!!!!77?JJY5PGB##&@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@#BPY?7~^:.               ..                  .:^~7JPG#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@&GY7^.       .::^~!7??JJJYYY55555YYYYYYYJJ??77!~^:..      .^?5PB&@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@#5?^.    .:^~!?JY55PPGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGP55Y?7!^:.     .^!7?JPB@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@B5!^    .:~!?Y5PGGGGGGGGGGGGGGGGPPPPP5555555PPPPGGGGGGGGGGGGGGGGPPYJ?7!^.       ^?5B&@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@&P?^    .^!?Y5PGGGGGGGGGPP5YJJ?7!~~^^^:::.......::^^^~~!7?JJY5PPGGGGGGGGGGGP5J!^.       :!YB@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@#5!:   .^!?5PGGGGGGGPP5J?7~^:..                                ..:^~7?Y5PGGGGGGGGGGPY7~:       ^JB&@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@&P?^.   :~?YPGGGGGGPPY?!~:.                                                .:^!?YPGGGGGGGGGPY7^.      :?B@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@B?:    ^!?YPGGGGGP5J7~:.                                                          .:~7J5PGGGGGGGPY7^.     .?&@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@&?    .!JPGGGGGGPY7^.                                                                    .^7J5GGGGGGGPY!:     ^B@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@P:   :75GGGGGGPY!^.                                                                           .^?5GGGGGGG57:    .G@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@#7   .!5GGGGGG57:.                                                                                 .^?PGGGGGGP?:   .5@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@@@@@@@@@@@@@@@@@&?.  .~JPGGGGPJ~.                                                                                       :!5GGGGGG5!.   !#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@@@@@@@@@@@@@@@@P:   ^?PGGGGPJ^                                                                                            .!YPGPPPPY~   .Y@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@@@@@@@@@@@@@@5^   :?5GGGGPY~.                                                                                               .!YGGPPGP?:   !&@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@@@@@@@@@@@@@Y   :!YGGGGG5~.                                                                                                   :7PGGGGPY~   :G@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@@@@@@@@@@@@Y   ^YPGGGGGJ:                                                                                                       ^YGGGGGP7.   J@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@@@@@@@@@@@5   ^YPGGGGP7.                                                                                                         .7PGGGPPJ:   ?@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@@@@@@@@@@J   :JPGGGG5~                                                                                                             ~5GPPPGY^   ?@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@@@@@@@@@7   ^JPGGGGY:                                                                                                               ^YGPPPG5^   P@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@@@@@@@&!   ^YGGGGGJ.                                                                                                                 :YGPPPPY:  .B@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@@@@@@@~   ~5GGGGG?.                                                                                                                   :YGPPPP?:  ^&@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@@@@@@?   ^5GGGGGJ.                      .                                                                      .^:.                    :YPPPP5?:  !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@@@@@5   :YGGGGGJ.                   :!J55:                                                                     ~GPP5?^                  ^YPPPP57.  Y@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@@@@B.  .JGGGGGY.                  ^JGGBG?.                                                                      !PGGGGY^                 ~PGPPP5~  .G@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@@@&^  .7PGGGG5:                 :JGGGGY^                                                                         :?5GGGGJ.                !PPPPPY^  :#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@@@?   ~PGGGGP~                 ~GBGGP!                                                                             .!YPGBY.               .?PPPPP?:  7@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@@P   :YGGGGG7                  YGP57.                                                                                 ^7JJ:                :JPPPP57.  P@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@&:  .?GGGGGY.                   ::.                                                                                                         ^5GPPPY~  :&@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@@7   !PGGGGP^                                .....                                                      .^^~^:                                7PGPPPJ:  7@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@@Y   :YGGGGG7                               :?5PPPP5J~           ^?J7:                  .?YJ7:         :JPGGGGPY!.                             .JGGPPP7.  Y@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@#:  .?GGGGGY.                              :PGGGGGGGGB!        .?GGGB?                   JBGGP?       :PBGGGGGGGBY.                             ^5GGPP5~  :#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@Y   ~PGGGGP~                               ?BGGGGGGGGBJ        YGGGG?.       .^:          JGGGB?      ~BGGGGGGGGGG:                              7GGGGPJ:  ?@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@@7  .JGGGGGJ                                ~GGGGGGGGGB7       !GPPG7        :PGGY.        .5GGGP.     :GBGGGGGGGBJ                               :YGGGGP!. .B@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@&^  ^YGGGGP^                                 ^J5GGGGPY!.       5GGGY         !GGGG^         5GGGP.      ^J5PGGGG57.                                !PGGGGY^  ^&@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@G  .!5GGGGG~                                   .^~~^.          YGGGJ        .5GGGGY        :GGGG5.        .:^^^:.                                  7PGGGGPJ:  7@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@@!  :JPGGGGG5:                                                  ~GGGP!.    .~5GGGGGGY~:.   :5GGGB?                                                 ~PGGGGGGP!.  !&@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        @@@@@@@@!  .!5GGGPGGGY.                                                  !GGGG5J?JY5GGGGJJPGGGP5YY5GGGGGJ.                                                :5GGGPPGGGP?.  ^B@@@@@@@@@&&&&@@@@@@@@@@@@@@@@
-        @@@@@@@7  .75GGGP5PGGG?                                                   :?5GGGBBBGGPJ^  :7YPGGBBBGGPY~                                                  JGGGP5PPGGGG?:  .G@@@#PJ!^:..:^!?P&@@@@@@@@@@@
-        @@@@@@7  .75GGGP555PGGG!                                                    .^~!777!~:       :~!777!~:                                                   !GGGPPPPPPGGGGJ:  .GP~    .:^^:.   :J&@@@@@@@@@
-        @@@@@?  .75GGGP55555PGGP:                                                                                                                               .PGGGPPPPPPPGGGGJ:      :!J5PPP5Y?~.  .~Y&@@@@@@
-        @@@@Y  .!5GGGPP55555PGGGJ                                                                                                                               ?BGGPPPPPPPPPGGGG?.  .^?PGGGGGGGGGPJ~:.  !@@@@@@
-        @@@P  .~5GGGPPPPPP555PGGG~                                                                                                                             ^GGGPPPPPPPY7~?GGGP7^7YPGGGGGGGGGGGGGPP7   J@@@@@
-        @@&^  ^YGGG?7Y5PPPPP5PPGGY                                                                                                                             ?BGGPPP5J!^.  .YGGGGGGGGGGGGBBBBGGGGGGGY^   7@@@@
-        @@J  .?PGGY. .:!?Y55PPPGGG^                                                                                                                           :GGG5?!^:.      ^PGGGGGGGGGBBBBBBBBGGGGGG5~   ?@@@
-        @#.  ~5GGP~      .:~7JYGGGY                                                                                                                           7GGG^            JGGGGGGBBB###BBBBBBGGGGGGP!   7@@
-        @P  .7PGGY.           .?GGG:                                                                                                                          YGB5.            ^GGGGBB#######BBBB##BGGGGGP~   J@
-        @Y  .?PGG7             :GGB!                                                                                                                         :PGB7             :GGGBB#######BBB##B57JGGGGG5^  .#
-        @7  :YPGGY~.            PGBY                                                                                                                         ~GGB~          .~JGBGGBB##########GJ^. :5GGGGG7.  Y
-        @^  ^YGGGBBP?^.         JBG5                                                                                                                         7BGG^       .~JG#&#BGGBB#######B5!.     JGGGGGJ.  J
-        &:  ~5GGGB###BGY7^.     7BGP.                                                                                                                        ?BGG:   .~?5B&&####BGGB##B##BP7^       :YGGGGG?.  Y
-        @~  ^YGGGB#######BG5?~: !BGP.                                                                                                                        ?BGG!!JPB#&&#######GGGB###GJ^.      .~?PGGGGG5~  :#
-        @7  :JPGGB############BGPGGP.                                                                                                                        7BGG##############BGGGBGY~.      .^?5GGGGGGPJ^   5@
-        @5  .7PGGB##############BGGP                                                                                                                         ~GGGB############BBGGP!.      .^75GGGGGGP57^   ^P@@
-        @&^  ^YPGGB#############GGGY                                                                                                                         .PGGB##########BBBGGGJ     :~?5GGGGGGP5?~.  .!P@@@@
-        @@P  .!5GGB############BGGB?                                                                                                                          JBGGB###########BGGP^ .^7YPGGGGGGP5?~:   ~5&@@@@@@</div>
-</center>
-<hr>
-<center>nginx</center>
+<h2>자리 경매 (총 32석)</h2>
+
+<div class="seat-grid" id="seatGrid"></div>
+
+<div style="text-align: center;">
+    <button id="printBtn">인쇄</button>
+    <button id="saveBtn" style="margin-left: 10px; background:#444;">JSON 저장</button>
+    <button id="testBtn" style="margin-left: 10px; background:#f39c12;">테스트 채우기</button>
+</div>
+
+<textarea id="output" readonly></textarea>
 
 <script>
-    let path = window.location.pathname + window.location.search + window.location.hash;
-    path = path.replace(/\.html$/, '');
-    document.getElementById('uri').textContent = '.' + path;
+    const list = [
+        "김나은","김민지","김준석","김준수","박시연","박준후",
+        "백지민","변상민","서현수","송승우","안태은","양우진",
+        "오윤하","우나현","이다인","이서준","이승원","이연재",
+        "이정인","이준혁","임은후","정재민","조소현","조정우",
+        "최석주","최이서","최재원","추서진","한린","황준성","황지우", "김다인"
+    ];
 
-    // 급여일 설정 (2025년 10월 10일 0시 0분 0초 0ms)
-    const salaryDate = new Date(2025, 9, 10, 0, 0, 0, 0); // 월은 0부터 시작 (9 = 10월)
+    const seatPrices = [
+        10, 15, 30, 30, 30, 30,
+        15, 20, 35, 35, 30, 30,
+        20, 25, 35, 40, 40, 30,
+        20, 25, 30, 30, 30, 25,
+        20, 20, 20, 20, 20, 20,
+        10, 10  // 맨 뒤 2자리
+    ];
 
-    function updateDelayTime() {
-        const now = new Date();
-        const diff = now - salaryDate;
+    const API_KEY = "$2a$10$v8MnmFSL/GoywF.qohAheOJAFCQDPmBW20gtMMHbxdN/zrkvUU1MW";
+    const BIN_ID_PRICE = "68921897ae596e708fc23d80";
+    const BIN_ID_POS = "689218ac7b4b8670d8add76b";
 
-        if (diff < 0) {
-            document.getElementById('delay-time').textContent = '아직 급여일이 아닙니다.';
-            return;
+    const seatGrid = document.getElementById("seatGrid");
+    let previousPositions = {};
+
+    // 이전 경매 데이터 불러오기
+    async function loadPreviousData() {
+        try {
+            const posRes = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID_POS}/latest`, {
+                headers: { "X-Master-Key": API_KEY }
+            });
+            const posData = (await posRes.json()).record;
+            previousPositions = posData;
+        } catch (err) {
+            console.log("이전 데이터 없음 또는 로드 실패:", err.message);
         }
-
-        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-        const milliseconds = diff % 1000;
-
-        document.getElementById('delay-time').textContent =
-            `${days}일 ${hours}시간 ${minutes}분 ${seconds}초 ${milliseconds}밀리초 연체되었습니다.`;
     }
 
-    // 초기 실행 및 10ms마다 업데이트
-    updateDelayTime();
-    setInterval(updateDelayTime, 10);
+    function getNameAtPosition(row, col) {
+        for (const [name, pos] of Object.entries(previousPositions)) {
+            if (!pos) continue;
+            const posClean = pos.replace("-red", "");
+            const [r, c] = posClean.split("*").map(Number);
+            if (r === row && c === col) return name;
+        }
+        return "";
+    }
+
+    function createSeat(index) {
+        const seat = document.createElement("div");
+        seat.className = "seat";
+
+        const row = Math.floor(index / 6);
+        const col = index % 6;
+        const previousName = getNameAtPosition(row, col);
+        const namePlaceholder = previousName || "이름";
+
+        seat.innerHTML = `
+            <input class="name" placeholder="${namePlaceholder}" />
+            <input class="price" type="number" placeholder="${seatPrices[index]}" />
+        `;
+
+        // 우클릭으로 빨간색 토글
+        seat.addEventListener("contextmenu", e => {
+            e.preventDefault();
+            seat.classList.toggle("flagged");
+        });
+
+        // 이름 입력하면 자동으로 빨간색
+        const nameInput = seat.querySelector(".name");
+        nameInput.addEventListener("input", () => {
+            if (nameInput.value.trim()) {
+                seat.classList.add("flagged");
+            } else {
+                seat.classList.remove("flagged");
+            }
+        });
+
+        return seat;
+    }
+
+    async function init() {
+        await loadPreviousData();
+
+        // 30석 (6x5)
+        for (let i = 0; i < 30; i++) {
+            const seat = createSeat(i);
+            seatGrid.appendChild(seat);
+        }
+
+        // 오른쪽 7번째 열 2자리 (31, 32번)
+        const seat31 = createSeat(30);
+        seat31.classList.add("last-seat-1");
+        seatGrid.appendChild(seat31);
+
+        const seat32 = createSeat(31);
+        seat32.classList.add("last-seat-2");
+        seatGrid.appendChild(seat32);
+    }
+
+    document.getElementById("printBtn").addEventListener("click", () => {
+        window.print();
+    });
+
+    // 테스트용 랜덤 채우기
+    document.getElementById("testBtn").addEventListener("click", () => {
+        const shuffled = [...list].sort(() => Math.random() - 0.5);
+        const names = document.querySelectorAll(".name");
+        const prices = document.querySelectorAll(".price");
+
+        for (let i = 0; i < Math.min(32, shuffled.length); i++) {
+            names[i].value = shuffled[i];
+            prices[i].value = Math.floor(Math.random() * 91) + 10;
+            names[i].dispatchEvent(new Event('input')); // 빨간색 트리거
+        }
+    });
+
+    document.getElementById("saveBtn").addEventListener("click", () => {
+        const names = document.querySelectorAll(".name");
+        const prices = document.querySelectorAll(".price");
+        const seats = document.querySelectorAll(".seat");
+
+        // 명단에 없는 이름 체크
+        const unknownNames = [];
+        for (let j = 0; j < names.length; j++) {
+            const inputName = names[j].value.trim();
+            if (inputName && !list.includes(inputName)) {
+                unknownNames.push(inputName);
+            }
+        }
+
+        // 명단에 없는 이름이 있으면 확인
+        if (unknownNames.length > 0) {
+            const confirmMsg = `다음 이름이 명단에 없습니다:\n${unknownNames.join(", ")}\n\n계속 저장하시겠습니까?`;
+            if (!confirm(confirmMsg)) {
+                return;
+            }
+        }
+
+        const priceArray = [];
+        const positionMap = {};
+        const absentStudents = [];
+
+        for (let i = 0; i < list.length; i++) {
+            const name = list[i];
+            let found = false;
+
+            for (let j = 0; j < names.length; j++) {
+                if (names[j].value.trim() === name) {
+                    const row = Math.floor(j / 6);
+                    const col = j % 6;
+                    let pos = `${row}*${col}`;
+
+                    if (seats[j].classList.contains("flagged")) {
+                        pos += "-red";
+                    }
+
+                    positionMap[name] = pos;
+                    // 가격이 비어있으면 기본값(placeholder) 사용
+                    const val = prices[j].value.trim();
+                    priceArray.push(val || prices[j].placeholder);
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found) {
+                positionMap[name] = "";
+                priceArray.push("0");
+                absentStudents.push(name);
+            }
+        }
+
+        // 결석 학생 확인
+        if (absentStudents.length > 0) {
+            const absentMsg = `다음 학생이 결석한 것이 맞나요?\n${absentStudents.join(", ")}\n\n계속 저장하시겠습니까?`;
+            if (!confirm(absentMsg)) {
+                return;
+            }
+        }
+
+        const outputText = `자리값 배열:\n${JSON.stringify(priceArray, null, 2)}\n\n자리 위치 맵:\n${JSON.stringify(positionMap, null, 2)}`;
+        document.getElementById("output").value = outputText;
+
+        saveToJsonBin(BIN_ID_PRICE, priceArray);
+        saveToJsonBin(BIN_ID_POS, positionMap);
+        alert("저장 완료!");
+    });
+
+    async function saveToJsonBin(binId, data) {
+        try {
+            await fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-Master-Key": API_KEY,
+                    "X-Bin-Versioning": "false"
+                },
+                body: JSON.stringify(data)
+            });
+        } catch (err) {
+            console.error("저장 실패:", err);
+        }
+    }
+
+    init();
 </script>
 </body>
 </html>
