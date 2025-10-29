@@ -10,6 +10,63 @@
             background: #f6faff;
         }
 
+        .fullscreen-btn {
+            padding: 8px 12px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .fullscreen-btn:hover {
+            background: #2980b9;
+        }
+
+        .seat-grid-container {
+            position: relative;
+        }
+
+        .seat-grid-container.fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #f6faff;
+            z-index: 9999;
+            padding: 40px;
+            box-sizing: border-box;
+            overflow: auto;
+        }
+
+        .seat-grid-container.fullscreen .seat-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            max-width: 1400px;
+            margin: 0 auto;
+            grid-gap: 20px;
+        }
+
+        .seat-grid-container.fullscreen .seat {
+            height: 120px;
+            font-size: 18px;
+        }
+
+        .seat-grid-container.fullscreen .seat input {
+            font-size: 16px;
+            padding: 5px;
+        }
+
+        .seat-grid-container.fullscreen .last-seat-1,
+        .seat-grid-container.fullscreen .last-seat-2 {
+            width: auto;
+            position: relative;
+            left: 0;
+            top: 0;
+        }
+
         .seat-grid {
             display: grid;
             grid-template-columns: repeat(6, 100px);
@@ -40,6 +97,10 @@
             margin: 1px 0;
         }
 
+        .seat input[type="number"] {
+            ime-mode: disabled;
+        }
+
         .seat input:focus {
             outline: none;
             background: #fff8cc;
@@ -59,7 +120,7 @@
         .last-seat-2 {
             position: absolute;
             width: 100px;
-            top: 70px;
+            top: 80px;
             left: 700px;
         }
 
@@ -83,12 +144,29 @@
             height: 200px;
         }
 
+        .status-bar {
+            margin: 10px 0;
+            padding: 10px;
+            background: #e8f5e9;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .status-bar.saving {
+            background: #fff3cd;
+        }
+
+        .status-bar.error {
+            background: #f8d7da;
+        }
+
         @media print {
             body {
                 margin: 0;
                 padding: 0;
             }
-            h2, #output, #printBtn, #saveBtn {
+            h2, #output, #printBtn, #saveBtn, .status-bar {
                 display: none;
             }
             .seat-grid {
@@ -100,15 +178,22 @@
 <body>
 <h2>자리 경매 (총 32석)</h2>
 <h4>팁 : Tab 키를 눌러 커서를 옆 자리로 이동하세요.</h4>
-<a href="javascript:(function(){const t=()=&gt;{const s=localStorage.getItem('afterSave');if(s){try{const d=JSON.parse(s);if(Date.now()-d.timestamp&gt;1800000){localStorage.removeItem('afterSave');alert('afterSave가 1시간 지나 초기화되었습니다.');}else{localStorage.removeItem('afterSave');setTimeout(()=&gt;{const b=[...document.querySelectorAll('button')].find(x=&gt;x.innerText.includes('급여 보내기')&amp;&amp;x.type==='submit');b?(b.click(),console.log('✅ 자리값 버튼 자동 클릭 완료')):console.warn('❌ 자리값 버튼 없음')},1000)}}catch{localStorage.removeItem('afterSave')}}};document.readyState==='loading'?document.addEventListener('DOMContentLoaded',t):t();const e=document.querySelector('input[type=&quot;submit&quot;][value^=&quot;소득세:&quot;]');if(e&amp;&amp;e.value!=='소득세: OFF'){alert('소득세를 OFF로 변경해주십시오!');return}try{document.querySelectorAll('input[name=&quot;checked_user_id[]&quot;]').forEach(c=&gt;c.checked=!0);const n='$2a$10$v8MnmFSL/GoywF.qohAheOJAFCQDPmBW20gtMMHbxdN/zrkvUU1MW',o='68921897ae596e708fc23d80';fetch(`https://api.jsonbin.io/v3/b/${o}/latest`,{headers:{'X-Master-Key':n}}).then(r=&gt;{if(!r.ok)throw new Error('데이터 요청 실패');return r.json()}).then(d=&gt;{const r=d.record||[],a=Array.from(document.querySelectorAll('input')).filter(i=&gt;i.matches('.w-full.border.text-center'));if(r.length===0||a.length===0)throw new Error('입력값 또는 필드 없음');let c=0;a.forEach((i,e)=&gt;{if(e%2===0){i.value='자리값';}else{if(c&lt;r.length){let v=String(r[c++]);if(!v.startsWith('-'))v='-'+v;i.value=v}}});setTimeout(()=&gt;{try{const b=[...document.querySelectorAll('button')].find(b=&gt;b.textContent.includes('저장하기')&amp;&amp;b.getAttribute('onclick')?.includes('/adminPage/jobSetting/saveJob'));if(!b)throw new Error('저장하기 버튼을 찾을 수 없음');localStorage.setItem('afterSave',JSON.stringify({timestamp:Date.now()}));alert('확인을 누른 후 북마크를 다시 눌러주십시오!');b.click()}catch(t){console.error('저장하기 클릭 에러:',t.message)}},1000)}).catch(e=&gt;console.error('데이터 로딩 오류:',e.message))}catch(e){console.error('초기 처리 오류:',e.message)}})();">
-    북마크 설치
-</a>
-<div class="seat-grid" id="seatGrid"></div>
+
+<div class="status-bar" id="statusBar">자동저장 대기중...</div>
+
+<div class="seat-grid-container" id="seatGridContainer">
+    <button class="fullscreen-btn" id="fullscreenBtn">⛶ 전체화면</button>
+    <br />
+    <br />
+    <div class="seat-grid" id="seatGrid"></div>
+</div>
 
 <div style="text-align: center;">
     <button id="printBtn">인쇄</button>
-    <button id="saveBtn" style="margin-left: 10px; background:#444;">JSON 저장</button>
-    <button id="testBtn" style="margin-left: 10px; background:#f39c12; display : none;">테스트 채우기</button>
+    <button id="saveBtn" style="margin-left: 10px; background:#444;">즉시 저장</button>
+    <button id="loadBtn" style="margin-left: 10px; background:#9b59b6;">불러오기</button>
+    <button id="clearBtn" style="margin-left: 10px; background:#e74c3c;">초기화</button>
+    <button id="testBtn" style="margin-left: 10px; background:#f39c12; display: none;">테스트 채우기</button>
 </div>
 
 <textarea id="output" readonly></textarea>
@@ -128,7 +213,7 @@
         20, 25, 35, 40, 40, 30,
         20, 25, 30, 30, 30, 25,
         20, 20, 20, 20, 20, 20,
-        10, 10  // 맨 뒤 2자리
+        10, 5
     ];
 
     const API_KEY = "$2a$10$v8MnmFSL/GoywF.qohAheOJAFCQDPmBW20gtMMHbxdN/zrkvUU1MW";
@@ -136,52 +221,34 @@
     const BIN_ID_POS = "689218ac7b4b8670d8add76b";
 
     const seatGrid = document.getElementById("seatGrid");
-    let previousPositions = {};
+    const statusBar = document.getElementById("statusBar");
+    let autoSaveInterval = null;
+    let isFirstSave = true;
 
-    // 이전 경매 데이터 불러오기
-    async function loadPreviousData() {
-        try {
-            const posRes = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID_POS}/latest`, {
-                headers: { "X-Master-Key": API_KEY }
-            });
-            const posData = (await posRes.json()).record;
-            previousPositions = posData;
-        } catch (err) {
-            console.log("이전 데이터 없음 또는 로드 실패:", err.message);
-        }
+    function updateStatus(message, type = 'normal') {
+        statusBar.textContent = message;
+        statusBar.className = 'status-bar';
+        if (type === 'saving') statusBar.classList.add('saving');
+        if (type === 'error') statusBar.classList.add('error');
     }
 
-    function getNameAtPosition(row, col) {
-        for (const [name, pos] of Object.entries(previousPositions)) {
-            if (!pos) continue;
-            const posClean = pos.replace("-red", "");
-            const [r, c] = posClean.split("*").map(Number);
-            if (r === row && c === col) return name;
-        }
-        return "";
-    }
-
-    function createSeat(index) {
+    function createSeat(index, previousName = "") {
         const seat = document.createElement("div");
         seat.className = "seat";
+        seat.dataset.index = index;
 
-        const row = Math.floor(index / 6);
-        const col = index % 6;
-        const previousName = getNameAtPosition(row, col);
         const namePlaceholder = previousName || "이름";
 
         seat.innerHTML = `
-            <input class="name" placeholder="${namePlaceholder}" />
-            <input class="price" type="number" placeholder="${seatPrices[index]}" />
+            <input class="name" placeholder="${namePlaceholder}" data-original-placeholder="${namePlaceholder}" />
+            <input class="price" type="text" placeholder="${seatPrices[index]}" />
         `;
 
-        // 우클릭으로 빨간색 토글
         seat.addEventListener("contextmenu", e => {
             e.preventDefault();
             seat.classList.toggle("flagged");
         });
 
-        // 이름 입력하면 자동으로 빨간색
         const nameInput = seat.querySelector(".name");
         nameInput.addEventListener("input", () => {
             if (nameInput.value.trim()) {
@@ -191,33 +258,287 @@
             }
         });
 
+        const priceInput = seat.querySelector(".price");
+        priceInput.addEventListener("input", (e) => {
+            e.target.value = e.target.value.replace(/[^0-9]/g, '');
+        });
+
         return seat;
     }
 
+    async function loadData() {
+        try {
+            updateStatus("데이터 불러오는 중...", 'saving');
+
+            const [priceRes, posRes] = await Promise.all([
+                fetch(`https://api.jsonbin.io/v3/b/${BIN_ID_PRICE}/latest`, {
+                    headers: { "X-Master-Key": API_KEY }
+                }),
+                fetch(`https://api.jsonbin.io/v3/b/${BIN_ID_POS}/latest`, {
+                    headers: { "X-Master-Key": API_KEY }
+                })
+            ]);
+
+            const priceData = (await priceRes.json()).record;
+            const posData = (await posRes.json()).record;
+
+            const names = document.querySelectorAll(".name");
+            const prices = document.querySelectorAll(".price");
+            const seats = document.querySelectorAll(".seat");
+
+            // 먼저 모든 자리 초기화
+            names.forEach(input => {
+                input.value = "";
+                // placeholder를 원래 placeholder로 복원
+                const originalPlaceholder = input.dataset.originalPlaceholder;
+                if (originalPlaceholder) {
+                    input.placeholder = originalPlaceholder;
+                }
+            });
+            prices.forEach(input => input.value = "");
+            seats.forEach(seat => seat.classList.remove("flagged"));
+
+            // 위치 데이터로 자리 채우기
+            for (const [name, pos] of Object.entries(posData)) {
+                if (!pos) continue;
+
+                const isRed = pos.includes("-red");
+                const posClean = pos.replace("-red", "");
+                const [row, col] = posClean.split("*").map(Number);
+                const seatIndex = row * 6 + col;
+
+                if (seatIndex >= 0 && seatIndex < 32) {
+                    names[seatIndex].value = name;
+                    // placeholder를 현재 이름으로 업데이트하고 저장
+                    names[seatIndex].placeholder = name;
+                    names[seatIndex].dataset.originalPlaceholder = name;
+
+                    const nameIdx = list.indexOf(name);
+                    if (nameIdx !== -1 && priceData[nameIdx]) {
+                        prices[seatIndex].value = priceData[nameIdx];
+                    }
+
+                    if (isRed) {
+                        seats[seatIndex].classList.add("flagged");
+                    }
+                }
+            }
+
+            updateStatus("불러오기 완료!", 'normal');
+            setTimeout(() => updateStatus("자동저장 활성화"), 2000);
+            isFirstSave = false;
+
+        } catch (err) {
+            console.log("불러오기 실패:", err);
+            updateStatus("불러올 데이터가 없습니다.", 'error');
+            setTimeout(() => updateStatus("자동저장 활성화"), 2000);
+        }
+    }
+
+    async function saveData(showAlert = false) {
+        try {
+            updateStatus("저장 중...", 'saving');
+
+            const names = document.querySelectorAll(".name");
+            const prices = document.querySelectorAll(".price");
+            const seats = document.querySelectorAll(".seat");
+
+            if (isFirstSave) {
+                // 첫 저장: DB 초기화
+                const emptyPriceArray = new Array(list.length).fill(0);
+                const emptyPositionMap = {};
+                list.forEach(name => emptyPositionMap[name] = "");
+
+                await Promise.all([
+                    saveToJsonBin(BIN_ID_PRICE, emptyPriceArray),
+                    saveToJsonBin(BIN_ID_POS, emptyPositionMap)
+                ]);
+
+                isFirstSave = false;
+            }
+
+            const priceArray = [];
+            const positionMap = {};
+
+            for (let i = 0; i < list.length; i++) {
+                const name = list[i];
+                let found = false;
+
+                for (let j = 0; j < names.length; j++) {
+                    if (names[j].value.trim() === name) {
+                        const row = Math.floor(j / 6);
+                        const col = j % 6;
+                        let pos = `${row}*${col}`;
+
+                        if (seats[j].classList.contains("flagged")) {
+                            pos += "-red";
+                        }
+
+                        positionMap[name] = pos;
+                        const val = prices[j].value.trim();
+                        const finalPrice = val || prices[j].placeholder;
+                        priceArray.push(parseInt(finalPrice) || 0);
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found) {
+                    positionMap[name] = "";
+                    priceArray.push(0);
+                }
+            }
+
+            await Promise.all([
+                saveToJsonBin(BIN_ID_PRICE, priceArray),
+                saveToJsonBin(BIN_ID_POS, positionMap)
+            ]);
+
+            const now = new Date().toLocaleTimeString('ko-KR');
+            updateStatus(`저장 완료 (${now})`, 'normal');
+
+            if (showAlert) {
+                alert("저장 완료!");
+            }
+
+        } catch (err) {
+            console.error("저장 실패:", err);
+            updateStatus("저장 실패!", 'error');
+        }
+    }
+
+    async function saveToJsonBin(binId, data) {
+        await fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "X-Master-Key": API_KEY,
+                "X-Bin-Versioning": "false"
+            },
+            body: JSON.stringify(data)
+        });
+    }
+
+    function startAutoSave() {
+        if (autoSaveInterval) {
+            clearInterval(autoSaveInterval);
+        }
+
+        autoSaveInterval = setInterval(() => {
+            saveData(false);
+        }, 10000); // 10초마다 자동 저장
+    }
+
     async function init() {
-        await loadPreviousData();
+        // 먼저 이전 데이터 로드 시도
+        let previousPositions = {};
+        try {
+            const posRes = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID_POS}/latest`, {
+                headers: { "X-Master-Key": API_KEY }
+            });
+            previousPositions = (await posRes.json()).record;
+        } catch (err) {
+            console.log("이전 자리 데이터 없음");
+        }
+
+        // 각 자리에 이전 학생 이름을 placeholder로 설정하는 함수
+        function getPreviousNameAt(index) {
+            const row = Math.floor(index / 6);
+            const col = index % 6;
+
+            for (const [name, pos] of Object.entries(previousPositions)) {
+                if (!pos) continue;
+                const posClean = pos.replace("-red", "");
+                const [r, c] = posClean.split("*").map(Number);
+                if (r === row && c === col) return name;
+            }
+            return "";
+        }
 
         // 30석 (6x5)
         for (let i = 0; i < 30; i++) {
-            const seat = createSeat(i);
+            const prevName = getPreviousNameAt(i);
+            const seat = createSeat(i, prevName);
             seatGrid.appendChild(seat);
         }
 
-        // 오른쪽 7번째 열 2자리 (31, 32번)
-        const seat31 = createSeat(30);
+        // 오른쪽 7번째 열 2자리
+        const prevName31 = getPreviousNameAt(30);
+        const seat31 = createSeat(30, prevName31);
         seat31.classList.add("last-seat-1");
         seatGrid.appendChild(seat31);
 
-        const seat32 = createSeat(31);
+        const prevName32 = getPreviousNameAt(31);
+        const seat32 = createSeat(31, prevName32);
         seat32.classList.add("last-seat-2");
         seatGrid.appendChild(seat32);
+
+        // 자동저장 시작
+        startAutoSave();
+        updateStatus("자동저장 활성화 (10초마다)", 'normal');
     }
 
+    // 버튼 이벤트
     document.getElementById("printBtn").addEventListener("click", () => {
         window.print();
     });
 
-    // 테스트용 랜덤 채우기
+    document.getElementById("saveBtn").addEventListener("click", () => {
+        saveData(true);
+    });
+
+    document.getElementById("loadBtn").addEventListener("click", () => {
+        if (confirm("현재 입력된 내용을 무시하고 저장된 데이터를 불러올까요?")) {
+            loadData();
+        }
+    });
+
+    document.getElementById("clearBtn").addEventListener("click", () => {
+        if (confirm("모든 입력을 지우고 초기화할까요?")) {
+            const names = document.querySelectorAll(".name");
+            const prices = document.querySelectorAll(".price");
+            const seats = document.querySelectorAll(".seat");
+
+            names.forEach(input => {
+                input.value = "";
+                // placeholder는 원래 값으로 복원
+                const originalPlaceholder = input.dataset.originalPlaceholder;
+                if (originalPlaceholder) {
+                    input.placeholder = originalPlaceholder;
+                }
+            });
+            prices.forEach(input => input.value = "");
+            seats.forEach(seat => seat.classList.remove("flagged"));
+
+            isFirstSave = true;
+            updateStatus("초기화 완료", 'normal');
+        }
+    });
+
+    document.getElementById("fullscreenBtn").addEventListener("click", () => {
+        const container = document.getElementById("seatGridContainer");
+        const btn = document.getElementById("fullscreenBtn");
+
+        container.classList.toggle("fullscreen");
+
+        if (container.classList.contains("fullscreen")) {
+            btn.textContent = "✕ 닫기";
+        } else {
+            btn.textContent = "⛶ 전체화면";
+        }
+    });
+
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+            const container = document.getElementById("seatGridContainer");
+            const btn = document.getElementById("fullscreenBtn");
+            if (container.classList.contains("fullscreen")) {
+                container.classList.remove("fullscreen");
+                btn.textContent = "⛶ 전체화면";
+            }
+        }
+    });
+
     document.getElementById("testBtn").addEventListener("click", () => {
         const shuffled = [...list].sort(() => Math.random() - 0.5);
         const names = document.querySelectorAll(".name");
@@ -226,97 +547,9 @@
         for (let i = 0; i < Math.min(32, shuffled.length); i++) {
             names[i].value = shuffled[i];
             prices[i].value = Math.floor(Math.random() * 91) + 10;
-            names[i].dispatchEvent(new Event('input')); // 빨간색 트리거
+            names[i].dispatchEvent(new Event('input'));
         }
     });
-
-    document.getElementById("saveBtn").addEventListener("click", () => {
-        const names = document.querySelectorAll(".name");
-        const prices = document.querySelectorAll(".price");
-        const seats = document.querySelectorAll(".seat");
-
-        // 명단에 없는 이름 체크
-        const unknownNames = [];
-        for (let j = 0; j < names.length; j++) {
-            const inputName = names[j].value.trim();
-            if (inputName && !list.includes(inputName)) {
-                unknownNames.push(inputName);
-            }
-        }
-
-        // 명단에 없는 이름이 있으면 확인
-        if (unknownNames.length > 0) {
-            const confirmMsg = `다음 이름이 명단에 없습니다:\n${unknownNames.join(", ")}\n\n계속 저장하시겠습니까?`;
-            if (!confirm(confirmMsg)) {
-                return;
-            }
-        }
-
-        const priceArray = [];
-        const positionMap = {};
-        const absentStudents = [];
-
-        for (let i = 0; i < list.length; i++) {
-            const name = list[i];
-            let found = false;
-
-            for (let j = 0; j < names.length; j++) {
-                if (names[j].value.trim() === name) {
-                    const row = Math.floor(j / 6);
-                    const col = j % 6;
-                    let pos = `${row}*${col}`;
-
-                    if (seats[j].classList.contains("flagged")) {
-                        pos += "-red";
-                    }
-
-                    positionMap[name] = pos;
-                    // 가격이 비어있으면 기본값(placeholder) 사용
-                    const val = prices[j].value.trim();
-                    priceArray.push(val || prices[j].placeholder);
-                    found = true;
-                    break;
-                }
-            }
-
-            if (!found) {
-                positionMap[name] = "";
-                priceArray.push("0");
-                absentStudents.push(name);
-            }
-        }
-
-        // 결석 학생 확인
-        if (absentStudents.length > 0) {
-            const absentMsg = `다음 학생이 결석한 것이 맞나요?\n${absentStudents.join(", ")}\n\n계속 저장하시겠습니까?`;
-            if (!confirm(absentMsg)) {
-                return;
-            }
-        }
-
-        const outputText = `자리값 배열:\n${JSON.stringify(priceArray, null, 2)}\n\n자리 위치 맵:\n${JSON.stringify(positionMap, null, 2)}`;
-        document.getElementById("output").value = outputText;
-
-        saveToJsonBin(BIN_ID_PRICE, priceArray);
-        saveToJsonBin(BIN_ID_POS, positionMap);
-        alert("저장 완료!");
-    });
-
-    async function saveToJsonBin(binId, data) {
-        try {
-            await fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-Master-Key": API_KEY,
-                    "X-Bin-Versioning": "false"
-                },
-                body: JSON.stringify(data)
-            });
-        } catch (err) {
-            console.error("저장 실패:", err);
-        }
-    }
 
     init();
 </script>
